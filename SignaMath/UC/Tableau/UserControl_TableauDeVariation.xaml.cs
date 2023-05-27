@@ -73,7 +73,7 @@ namespace SignaMath
                 label_formula.MinHeight = 50;
                 label_formula.HorizontalAlignment = HorizontalAlignment.Right;
                 label_formula.VerticalAlignment = isPlus ? VerticalAlignment.Top : VerticalAlignment.Bottom;
-                label_formula.Margin = isPlus ? new Thickness(0, 0, -20, 0) : new Thickness(0, 10.5, -20, 5);
+                label_formula.Margin = isPlus ? new Thickness(0, 0, -20, 0) : new Thickness(0, 10.5, -25, 5);
                 gridElement.Children.Add(label_formula);
 
                 if (i == 0)

@@ -114,7 +114,7 @@ namespace SignaMath
             if (!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
             {
                 StackPanel_Row.Children.Remove(StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList()[0]);
-                StackPanel_Row.Children.Add(new UserControl_TableauDeVariation(StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList()[0]) { Height = HeightRowSlider.Value });
+                StackPanel_Row.Children.Add(new UserControl_TableauDeVariation(StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList()[0]) { Height = HeightTableauDeVariationSlider.Value });
             }
         }
 
@@ -131,7 +131,10 @@ namespace SignaMath
                     Button_AjoutLigneConcluante_Click(this, null);
                 }
 
-                UserControl_TableauDeVariation uc = new UserControl_TableauDeVariation(StackPanel_Row.Children.OfType<UserControl_BottomRow>().First());
+                UserControl_TableauDeVariation uc = new UserControl_TableauDeVariation(StackPanel_Row.Children.OfType<UserControl_BottomRow>().First())
+                {
+                    Height= HeightTableauDeVariationSlider.Value,
+                };
                 StackPanel_Row.Children.Add(uc);
 
                 button_AjoutTableauVariation.Content = "Supprimer le tableau de variation";

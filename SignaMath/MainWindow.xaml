@@ -27,7 +27,7 @@
                         <TextBlock Text="Hauteur des autres lignes : " Margin="30,0,0,0" FontSize="17"/>
                         <Slider x:Name="HeightRowSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,3.5,0,0" />
                         <TextBlock Text="Hauteur du tableau de variation : " Margin="30,0,0,0" FontSize="17"/>
-                        <Slider x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="50" Width="200" Margin="0,3.5,0,0" />
+                        <Slider x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="200" Width="200" Margin="0,3.5,0,0" />
                     </StackPanel>
 
                 </ScrollViewer>
