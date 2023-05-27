@@ -1,7 +1,7 @@
 # SignaMath
 SignaMath est un logiciel gratuit qui permet de dresser des tableaux de signes et de variations simplement !
 
-Exemple de tableau dressé et sauvegarder à l'aide du logiciel :
+Exemple de tableau dressé et sauvegardé à l'aide du logiciel :
 
 ![tableau05_32_31](https://github.com/zonetecde/SignaMath/assets/56195432/30c8609c-2d75-438b-a8db-d9f05aa186b6)
 
