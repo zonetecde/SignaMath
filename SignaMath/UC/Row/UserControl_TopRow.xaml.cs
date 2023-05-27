@@ -1,4 +1,5 @@
 ﻿using SignaMath.Classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -23,12 +24,18 @@ namespace SignaMath
 
             TextBox_VariableName.FormulaChanged = (newVariable) =>
             {
+                // si c'est un chiffre il y a une erreur
+                if (char.IsDigit(Convert.ToChar(newVariable)))
+                {
+                    throw new Exception(); 
+                }
+
                 // Change toutes les variables déjà écrite
-                MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(uc =>
+                MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(uc =>
                 {
                     uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(MainWindow.VariableName, newVariable);
                 });
-                MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList().ForEach(uc =>
+                MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList().ForEach(uc =>
                 {
                     uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(MainWindow.VariableName, newVariable);
                 });
@@ -106,11 +113,11 @@ namespace SignaMath
                 RightSideElements.ForEach(x => x.ColumnSign = '+');
                 ColumnElement.LastColumnSign = '+';
 
-                MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => x.UpdateRow());
+                MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => x.UpdateRow());
                 // update ensuite la colonne final
-                MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList().ForEach(x => x.UpdateRow());
+                MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList().ForEach(x => x.UpdateRow());
                 // Update tableau de variation
-                MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList().ForEach(x => x.UpdateRow());
+                MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList().ForEach(x => x.UpdateRow());
             }
         }
     }

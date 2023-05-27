@@ -188,17 +188,15 @@ namespace SignaMath
                                 UcTopRow.RightSideElements[i].ColumnSign = '+';
                             break;
                     }
-
-
                 }
                 else
                 {
                     // Si c'est un nombre seul (ex : 5) (car il n'y a pas de colonne)
-                    if (UcTopRow.RightSideElements.Count == 0)
+                    if (!UcTopRow.RightSideElements.Any(x => x.FromRows.Contains(RowId)))
                     {
                         // on convert l'expression (elle peut être une fraction, comme -3/4)
                         string expBrute = TextBox_Expression.textBox_clear.Text;
-                        double approximation = Extension.Extension.StrToDouble(expBrute);
+                        double approximation = Extension.Extension.StrToDouble(expBrute, true);
 
                         label_signe.Content = approximation >= 0 ? '+' : '-';
                     }
@@ -250,12 +248,12 @@ namespace SignaMath
             return sign;
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteRow_Click(object sender, RoutedEventArgs? e)
         {
             // S'enlève de toutes les colonnes
             UcTopRow.RightSideElements.ForEach(x => x.FromRows.Remove(this.RowId));
 
-            MainWindow._MainWindow.StackPanel_Row.Children.Remove(this);
+            MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.Remove(this);
 
             UcTopRow.UpdateRightSideElement();
         }
@@ -263,6 +261,24 @@ namespace SignaMath
         private void Border_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
+        }
+
+        private void UserControl_MouseEnter(object sender, MouseEventArgs e)
+        {
+            // Affiche bouton 'supprimer'
+            button_Supprimer.Visibility = Visibility.Visible;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            // supprime la row
+            MenuItem_DeleteRow_Click(this, null);
+        }
+
+        private void UserControl_MouseLeave(object sender, MouseEventArgs e)
+        {
+            // cache bouton 'supprimer'
+            button_Supprimer.Visibility = Visibility.Collapsed;
         }
     }
 }

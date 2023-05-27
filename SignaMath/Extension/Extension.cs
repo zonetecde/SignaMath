@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -11,6 +12,7 @@ namespace SignaMath.Extension
 {
     internal static class Extension
     {
+        // Méthode qui retourne une brosse de couleur aléatoire
         internal static Brush PickBrush()
         {
             Brush result = Brushes.Transparent;
@@ -27,11 +29,16 @@ namespace SignaMath.Extension
             return result;
         }
 
-        internal static void WriteToPng(UIElement element, string filename)
+        // Méthode qui écrit un élément UI dans un fichier PNG ou le copie dans le presse-papiers
+        internal static void WriteToPng(UIElement element, string filename, bool copyClipboard = false)
         {
+            MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Wait;
+
+            // Création d'un rectangle pour définir la taille de l'élément
             var rect = new Rect(element.RenderSize);
             var visual = new DrawingVisual();
 
+            // Ouverture du contexte graphique pour dessiner l'élément dans le rectangle
             using (var dc = visual.RenderOpen())
             {
                 dc.DrawRectangle(new VisualBrush(element), null, rect);
@@ -40,70 +47,109 @@ namespace SignaMath.Extension
             var dpiX = 300; // Résolution horizontale en DPI
             var dpiY = 300; // Résolution verticale en DPI
 
+            // Calcul des dimensions en pixels en fonction de la résolution
             var pixelWidth = (int)(rect.Width * dpiX / 96);
             var pixelHeight = (int)(rect.Height * dpiY / 96);
 
+            // Création d'une image de rendu avec les dimensions calculées
             var bitmap = new RenderTargetBitmap(
                 pixelWidth, pixelHeight, dpiX, dpiY, PixelFormats.Default);
             bitmap.Render(visual);
 
+            // Création d'un encodeur pour le format PNG
             var encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(bitmap));
 
-            using (var file = File.OpenWrite(filename))
+            if (!copyClipboard)
             {
-                encoder.Save(file);
-            }
-        }
-
-        internal static double StrToDouble(string expBrute)
-        {
-            double approximation;
-            if (expBrute.Contains('/'))
-            {
-                // fraction toujours pas convertie
-                approximation = ParseDoubleFromString(expBrute);
+                // Sauvegarde de l'image dans un fichier
+                using (var file = File.OpenWrite(filename))
+                {
+                    encoder.Save(file);
+                }
             }
             else
             {
-                approximation = double.Parse(expBrute.Replace(",", "."), CultureInfo.InvariantCulture);
+                // Copie de l'image dans le presse-papiers
+                Clipboard.SetImage(bitmap);
+            }
+
+            MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
+        }
+
+        /// <summary>
+        /// Converti une expression mathématique en son résultat
+        /// </summary>
+        /// <param name="expBrute">Expression mathématique brute</param>
+        /// <param name="isAlone">Indique si on s'intéresse uniquement au signe</param>
+        /// <returns>Résultat de la conversion</returns>
+        internal static double StrToDouble(string expBrute, bool isAlone = false)
+        {
+            double approximation;
+            try
+            {
+                if (expBrute.Contains('/'))
+                {
+                    // Fraction non encore convertie
+                    approximation = ParseDoubleFromString(expBrute);
+                }
+                else
+                {
+                    // Conversion directe en utilisant le séparateur de décimales approprié
+                    approximation = double.Parse(expBrute.Replace(",", "."), CultureInfo.InvariantCulture);
+                }
+            }
+            catch
+            {
+                // Si on ne s'intéresse qu'au signe
+                if (isAlone)
+                {
+                    // Le signe est déterminé en comptant le nombre de signes négatifs présents
+                    approximation = expBrute.Count(x => x == '-') % 2 == 0 ? 1 : -1;
+                }
+                else
+                {
+                    // Si la conversion échoue et qu'on ne s'intéresse pas uniquement au signe, on lance une exception
+                    throw new Exception();
+                }
             }
 
             return approximation;
         }
 
+        // Méthode privée pour extraire un nombre réel d'une chaîne de caractères
         private static double ParseDoubleFromString(string num)
         {
-            //removes multiple spces between characters, cammas, and leading/trailing whitespace
+            // Supprime les espaces multiples entre les caractères, les virgules et les espaces en début et fin de chaîne
             num = Regex.Replace(num.Replace(",", ""), @"\s+", " ").Trim();
             double d = 0;
             int whole = 0;
             double numerator;
             double denominator;
 
-            //is there a fraction?
+            // Y a-t-il une fraction ?
             if (num.Contains("/"))
             {
-                //is there a space?
+                // Y a-t-il un espace ?
                 if (num.Contains(" "))
                 {
-                    //seperate the integer and fraction
+                    // Sépare l'entier et la fraction
                     int firstspace = num.IndexOf(" ");
                     string fraction = num.Substring(firstspace, num.Length - firstspace);
-                    //set the integer
+                    // Définit l'entier
                     whole = int.Parse(num.Substring(0, firstspace));
-                    //set the numerator and denominator
+                    // Définit le numérateur et le dénominateur
                     numerator = double.Parse(fraction.Split("/".ToCharArray())[0]);
                     denominator = double.Parse(fraction.Split("/".ToCharArray())[1]);
                 }
                 else
                 {
-                    //set the numerator and denominator
+                    // Définit le numérateur et le dénominateur
                     numerator = double.Parse(num.Split("/".ToCharArray())[0]);
                     denominator = double.Parse(num.Split("/".ToCharArray())[1]);
                 }
 
-                //is it a valid fraction?
+                // Est-ce une fraction valide ?
                 if (denominator != 0)
                 {
                     d = whole + numerator / denominator;
@@ -111,7 +157,7 @@ namespace SignaMath.Extension
             }
             else
             {
-                //parse the whole thing
+                // Conversion directe de la chaîne en nombre réel en supprimant les espaces
                 d = double.Parse(num.Replace(" ", ""));
             }
 

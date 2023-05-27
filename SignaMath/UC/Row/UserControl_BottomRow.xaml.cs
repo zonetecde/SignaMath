@@ -31,7 +31,7 @@ namespace SignaMath
             Grid_RightSide.ColumnDefinitions.Clear();
 
             // Récupère la première ligne du tableau de variation
-            var UcTopRow = (UserControl_TopRow)MainWindow._MainWindow.StackPanel_Row.Children[0];
+            var UcTopRow = (UserControl_TopRow)MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children[0];
 
             for (int i = 0; i < UcTopRow.RightSideElements.Count + 1; i++)
             {
@@ -62,7 +62,7 @@ namespace SignaMath
                     try
                     {
                         // Met à jour le tableau de variation
-                        MainWindow._MainWindow.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().First().UpdateRow();
+                        MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().First().UpdateRow();
                     }
                     catch
                     {
@@ -120,10 +120,28 @@ namespace SignaMath
             }
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_DeleteRow_Click(object sender, RoutedEventArgs? e)
         {
             // Supprime la ligne courante du tableau
             MainWindow._MainWindow.Button_AjoutLigneConcluante_Click(this, null);
+        }
+
+        private void UserControl_MouseEnter(object sender, MouseEventArgs e)
+        {
+            // Affiche bouton 'supprimer'
+            button_Supprimer.Visibility = Visibility.Visible;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            // supprime la row
+            MenuItem_DeleteRow_Click(this, null);
+        }
+
+        private void UserControl_MouseLeave(object sender, MouseEventArgs e)
+        {
+            // cache bouton 'supprimer'
+            button_Supprimer.Visibility = Visibility.Collapsed;
         }
     }
 }
