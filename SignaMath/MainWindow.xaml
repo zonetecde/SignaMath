@@ -3,10 +3,119 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         xmlns:local="clr-namespace:SignaMath"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="SignaMath" MinHeight="450" MinWidth="800" Icon="assets/icon.png">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <Border  Grid.Row="0" Margin="20,20,20,0">
+            <StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="0,0,0,-5" Margin="0,0,0,5">
+                    <ScrollViewer.Resources>
+                        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
+                    </ScrollViewer.Resources>
+                    <StackPanel Height="30" Orientation="Horizontal">
+                        <TextBlock Text="Longueur du tableau : " FontSize="17"/>
+                        <Slider x:Name="WidthSlider" Minimum="500" Maximum="3000" Value="1000" Width="200" Margin="0,3.5,0,0"/>
+                        <TextBlock Text="Hauteur de la première ligne : " Margin="30,0,0,0" FontSize="17"/>
+                        <Slider x:Name="HeightHeaderSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,3.5,0,0" />
+                        <TextBlock Text="Hauteur des autres lignes : " Margin="30,0,0,0" FontSize="17"/>
+                        <Slider x:Name="HeightRowSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,3.5,0,0" />
+                        <TextBlock Text="Hauteur du tableau de variation : " Margin="30,0,0,0" FontSize="17"/>
+                        <Slider x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="50" Width="200" Margin="0,3.5,0,0" />
+                    </StackPanel>
+
+                </ScrollViewer>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Ajouter une ligne" Background="White" Click="Button_AddRow_Click" FontSize="16" Margin="0,0,5,0"/>
+                    <Button Grid.Column="1" Content="Ajouter une ligne de valeur interdite" Background="White" Click="Button_AddForbiddenValueRow_Click" FontSize="16" Margin="5,0,0,0"/>
+                </Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="button_AjoutLigneConcluante" Content="Ajouter la ligne concluante" Background="White" Click="Button_AjoutLigneConcluante_Click" Margin="0,5,5,0" FontSize="16" IsEnabled="False" />
+                    <Button Grid.Column="1" x:Name="button_AjoutTableauVariation" Content="Ajouter le tableau de variation" Background="White" Click="Button_AjoutTableauVariation_Click" Margin="5,5,0,0" FontSize="16" IsEnabled="False" />
+                </Grid>
+            </StackPanel>
+
+        </Border>
+
+        <Viewbox x:Name="viewBox_tableau" Grid.Row="1" Margin="50,10,50,35" >
+            <Border x:Name="Border_TableauDeSigne" BorderThickness="2,2,2,0" BorderBrush="Black" 
+                Width="{Binding ElementName=WidthSlider, Path=Value}" MinHeight="{Binding ElementName=HeightSlider, Path=Value}" VerticalAlignment="Center"
+                Grid.Row="1">
+                <StackPanel x:Name="StackPanel_Row" >
+                    <local:UserControl_TopRow/>
+                </StackPanel>
+            </Border>
+        </Viewbox>
+
+        <Button Grid.Row="1" x:Name="button_Save" Content="Enregistrer" Background="White" Click="button_Save_Click" Margin="205,5,0,5" FontSize="16" HorizontalAlignment="Center" Width="200" VerticalAlignment="Bottom" />
+        <Button Grid.Row="1" x:Name="button_Help" Content="Aide" Background="White" Margin="5,5,205,5" FontSize="16" HorizontalAlignment="Center" Width="200" VerticalAlignment="Bottom" ButtonBase.Click="button_Help_Click" />
+
+        <Grid Grid.RowSpan="2" x:Name="Grid_Help" Background="#CC000000" Visibility="Hidden">
+            <Border Background="#FFF7F7F7" Width="600" Height="300" BorderBrush="Black" CornerRadius="20,0,0,20" BorderThickness="2,2,2,2" Padding="10,10,0,10">
+                <Grid>
+
+                    <ScrollViewer>
+                        <StackPanel>
+                            <Label Content="Aide pour l'utilisation" FontSize="20" HorizontalAlignment="Center" Padding="5,0,5,5" FontFamily="Calibri" FontWeight="Bold"/>
+                            <Label Content="Comment écrire des racines carrées ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                        <Run Text="Pour insérer une racine carrée dans une expression, il faut écrire"/>
+                        <Run Text="sqrt(x)" FontWeight="Bold"/>
+                        <Run Text="en remplaçant x par le nombre souhaité, ou par une variable."/>
+                            </TextBlock>
+
+                            <Label Content="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Run Text="Pour écrire une puissance de deux par exemple, il faut taper "/><Run Text="^2" FontWeight="Bold"/><Run Text="."/>
+                            </TextBlock>
+
+                            <Label Content="Comment changer le nom de la variable x ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                        <Run Text="Pour changer le nom de la variable x il faut appuyer dans la cellule en haut à gauche du tableau."/>
+                            </TextBlock>
+
+                            <Label Content="Il y a une erreur de signe" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                        <Run Text="Il se peut que, lorsque vous choisissez un intervalle, que les signes ne soient pas toujours corrects. Vous pouvez cependant les corrigés en faisant un clique gauche dessus, afin de mettre la valeur attendue."/>
+                            </TextBlock>
+
+                            <Label Content="Pourquoi aucune valeur n'est affichée dans le tableau de variation" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Run Text="Comme le logiciel ne prend pas une fonction en entrée, il ne sait pas comment calculer l'expression demandée. Il vous faut donc calculer vous-même le résultat et l'insérer en faisant un clique gauche à l'extrémité de la flèche souhaitée."/>
+                            </TextBlock>
+
+
+                            <Label Content="---------" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+
+                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Run Text="Logiciel sous la licence Apache."/><LineBreak/>
+                            <Run Text="STASZEWSKI Rayane - 2023 - www.github.com/zonetecde"/><LineBreak/><LineBreak/>
+                            <Run Text="Version "/><Run x:Name="Run_Version" Text="Version 1.0.0"/>
+                            </TextBlock>
+                        </StackPanel>
+
+                    </ScrollViewer>
+
+                    <Button Content="X" Background="#FFFFE1E1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,0,30,0" FontFamily="Consolas" Padding="1,0,1,0" FontSize="16" ButtonBase.Click="Button_CloseHelp_Click"/>
+                </Grid>
+
+            </Border>
+        </Grid>
     </Grid>
 </Window>

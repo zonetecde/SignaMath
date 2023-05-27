@@ -5,6 +5,37 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>assets\icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="arrow_bottom.png" />
+    <None Remove="arrow_top.png" />
+    <None Remove="assets\arrow_bottom.png" />
+    <None Remove="assets\arrow_top.png" />
+    <None Remove="assets\icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="assets\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AngouriMath" Version="1.3.0" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
+    <PackageReference Include="WpfMath" Version="1.1.0" />
+    <PackageReference Include="XamlMath.Shared" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\arrow_bottom.png" />
+    <Resource Include="assets\arrow_top.png" />
+    <Resource Include="assets\icon.png" />
+  </ItemGroup>
 
 </Project>
