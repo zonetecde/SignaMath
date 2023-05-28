@@ -116,7 +116,7 @@
                             <Label Content="---------" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
 
                             <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
-                            <Run Text="Logiciel sous la licence Apache."/><LineBreak/>
+                            <Run Text="Ce logiciel est distribué sous licence CC BY-NC."/><LineBreak/>
                             <Run Text="STASZEWSKI Rayane - 2023 - www.github.com/zonetecde"/><LineBreak/><LineBreak/>
                             <Run Text="Version "/><Run x:Name="Run_Version" Text="Version 1.0.0"/>
                             </TextBlock>
