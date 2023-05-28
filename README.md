@@ -12,3 +12,4 @@ Interface du logiciel :
 Le nom de la variable et des fonctions sont customisables.
 Le logiciel est facile à prendre en main avec une interface intuitive.
 
+Ce logiciel est distribué sous licence CC BY-NC. Veuillez consulter le fichier LICENSE pour plus de détails.
