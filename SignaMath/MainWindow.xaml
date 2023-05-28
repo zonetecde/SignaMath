@@ -104,7 +104,7 @@
                             <Label Content="Il y a une erreur de signe" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
 
                             <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
-                        <Run Text="Il se peut que, lorsque vous choisissez un intervalle, que les signes ne soient pas toujours corrects. Vous pouvez cependant les corrigés en faisant un clique gauche dessus, afin de mettre la valeur attendue."/>
+                        <Run Text="Il se peut que les signes ne soient pas corrects (ce n'est cependant encore jamais arrivé). Vous pouvez cependant corriger les signes erronés en faisant un clique gauche dessus, afin de mettre la valeur attendue."/>
                             </TextBlock>
 
                             <Label Content="Pourquoi aucune valeur n'est affichée dans le tableau de variation" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>

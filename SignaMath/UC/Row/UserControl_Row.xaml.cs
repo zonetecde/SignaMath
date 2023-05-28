@@ -5,6 +5,7 @@ using SignaMath.UC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace SignaMath
         internal List<string> RightSideElement = new List<string>();
         public RowType RowType { get; }
         public int RowId { get; private set; }
+        private bool UpdateAgain = true;
 
         public UserControl_Row(RowType rowType, int rowId)
         {
@@ -112,15 +114,17 @@ namespace SignaMath
                         // le nom de la variable écrite n'est pas correct.
                         throw new Exception();
 
+                    char oldLetter = GlobalVariable.VariableName;
+                    GlobalVariable.VariableName = Convert.ToChar(newFormula);
+
                     // Le nom de la variable est correcte, change donc toutes les formules
                     // des rows avec le nouveau nom de variable
                     MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().FindAll(x => x.RowType != RowType.HEADER).ForEach(uc =>
                     {
-                        uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(GlobalVariable.VariableName, Convert.ToChar(newFormula));
+                        uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(oldLetter, Convert.ToChar(newFormula));
                     });
 
                     // Change dans les paramètres globaux le nom de la variable par le nouveau
-                    GlobalVariable.VariableName = Convert.ToChar(newFormula);
 
                     break;
 
@@ -191,22 +195,18 @@ namespace SignaMath
         /// </summary>
         internal void UpdateRow()
         {
-            Console.WriteLine("update row : " + RowType.ToString());
-
             // Commence par supprimer les anciennes colonnes placées
             Grid_RowColumns.Children.Clear();
             Grid_RowColumns.ColumnDefinitions.Clear();
 
+            // Enlève toutes les colonnes qui ne sont pas comprise dans l'interval
+            var tableColumns = new List<ColumnElement>(GlobalVariable.TableColumns);
+            tableColumns.RemoveAll(x => x.Value < GlobalVariable.IntervalleMin || x.Value > GlobalVariable.IntervalleMax);
+
             // Ajoute, pour chaque colonne du tableau, une colonne dans la ligne
             // Le `i` va de 0 à `nombre de colonne + 1` car sinon il manquerait la dernière case dans la row
-            for (int i = 0; i < GlobalVariable.TableColumns.Count + 1; i++)
+            for (int i = 0; i < tableColumns.Count + 1; i++)
             {
-                // Vérifie que la colonne est comprise dans l'intervalle du tableau
-                if (i != GlobalVariable.TableColumns.Count)
-                    if (!(GlobalVariable.TableColumns[i].Value > GlobalVariable.IntervalleMin && GlobalVariable.TableColumns[i].Value < GlobalVariable.IntervalleMax))
-                        // La valeur n'est pas comprise dans l'intervalle du tableau; on n'affiche pas cette colonne
-                        continue;
-
                 // Ajoute la colonne
                 Grid_RowColumns.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -214,7 +214,7 @@ namespace SignaMath
                 if (RowType == RowType.HEADER)
                 {
                     // Si ce n'est pas la dernière colonne
-                    if (i != GlobalVariable.TableColumns.Count)
+                    if (i != tableColumns.Count)
                     {
                         // Création du texte contenant la solution (le 'nombre' de la colonne)
                         UserControl_FormulaTextBox uc = new UserControl_FormulaTextBox()
@@ -224,7 +224,8 @@ namespace SignaMath
                         };
 
                         // Set le 'nombre' de la colonne
-                        uc.textBox_clear.Text = GlobalVariable.TableColumns[i].Expression;
+                        uc.textBox_clear.Text = tableColumns[i].Expression;
+                        uc.formulaControl_formatted.ToolTip = tableColumns[i].Value;
 
                         // Permet de centrer le texte avec les colonnes
                         uc.Loaded += (sender, e) =>
@@ -247,17 +248,17 @@ namespace SignaMath
                 }
 
                 // Ajoute le signe de la colonne à cette row si c'est une ligne de signe
-                UserControl_CellSign userControl_CellSign = new UserControl_CellSign(i == GlobalVariable.TableColumns.Count, RowType);
+                UserControl_CellSign userControl_CellSign = new UserControl_CellSign(i == tableColumns.Count, RowType);
                 Grid.SetColumn(userControl_CellSign, i);
                 Grid_RowColumns.Children.Add(userControl_CellSign);
 
                 // Si c'est une ligne concluante
                 if (RowType == RowType.CONCLUANTE)
                 {
-                    if (i != GlobalVariable.TableColumns.Count)
+                    if (i != tableColumns.Count)
                     {
                         // Ajoute une seconde barre si la colonne contient une valeur interdite
-                        if (GlobalVariable.TableColumns[i].ValeurInterdite)
+                        if (tableColumns[i].ValeurInterdite)
                         {
                             userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
                         }
@@ -269,7 +270,7 @@ namespace SignaMath
                         }
 
                         // Set le signe de la colonne
-                        userControl_CellSign.Label_Sign.Content = GlobalVariable.TableColumns[i].ColumnSign;
+                        userControl_CellSign.Label_Sign.Content = tableColumns[i].ColumnSign;
                     }
                     else
                     {
@@ -306,10 +307,10 @@ namespace SignaMath
                     }
 
                     // Si ce n'est pas la dernière colonne
-                    if (i != GlobalVariable.TableColumns.Count)
+                    if (i != tableColumns.Count)
                     {
                         // si c'est une valeur interdite alors double barre
-                        if (GlobalVariable.TableColumns[i].ValeurInterdite)
+                        if (tableColumns[i].ValeurInterdite)
                         {
                             userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
                             // Pour pas que le texte rentre dans la double barre
@@ -334,7 +335,7 @@ namespace SignaMath
                 if (RowType == RowType.MIDDLE || RowType == RowType.MIDDLE_INTERDITE)
                 {
                     // Si l'expression n'a aucune solution c'est quelle est toujours pos ou toujours neg
-                    if (!GlobalVariable.TableColumns.Any(x => x.FromRows.Contains(RowId)) && this.RowType != RowType.CONCLUANTE)
+                    if (!tableColumns.Any(x => x.FromRows.Contains(RowId)) && this.RowType != RowType.CONCLUANTE)
                     {
                         // Soit c'est une expression qui contient du x :
                         if (TextBox_Expression.textBox_clear.Text.Contains(GlobalVariable.VariableName))
@@ -358,17 +359,17 @@ namespace SignaMath
                     }
 
                     // Si ce n'est pas la dernière colonne
-                    if (i != GlobalVariable.TableColumns.Count)
+                    if (i != tableColumns.Count)
                     {
                         // Si l'expression de cette row s'annulle au numéro de la colonne, on place un 0
                         // (en d'autre terme, si c'est une solution)
-                        if (GlobalVariable.TableColumns[i].FromRows.Contains(RowId))
+                        if (tableColumns[i].FromRows.Contains(RowId))
                         {
                             // Si c'est une ligne de valeur interdite, on ne met pas de `0` mais une double barre
                             if (RowType == RowType.MIDDLE_INTERDITE)
                             {
                                 // Set la colonne entière en tant que valeur interdite (pour le tableau de variation)
-                                GlobalVariable.TableColumns[i].ValeurInterdite = true;
+                                tableColumns[i].ValeurInterdite = true;
 
                                 // Affiche la seconde barre
                                 userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
@@ -385,24 +386,24 @@ namespace SignaMath
                         // On récupère donc la formule de l'expression de cette row
                         string formule = TextBox_Expression.textBox_clear.Text;
                         // On set la valeur qui va remplacer 'x' par la valeur de la colonne - un nombre très petit
-                        double variable = GlobalVariable.TableColumns[i].Value - 0.00000000001;
+                        double variable = tableColumns[i].Value - 0.00000000001;
                         // Ainsi, on récupère le signe du résultat
                         char cellSign = GetSign(formule, variable);
                         userControl_CellSign.Label_Sign.Content = cellSign;
 
                         // Met à jour le signe de la colonne entière pour la ligne concluante
                         // en usant de la règle des signes
-                        char columnSign = GlobalVariable.TableColumns[i].ColumnSign;
+                        char columnSign = tableColumns[i].ColumnSign;
 
                         switch (columnSign)
                         {
                             case '+':
                                 if (cellSign == '-') // + et - = -
-                                    GlobalVariable.TableColumns[i].ColumnSign = '-';
+                                    tableColumns[i].ColumnSign = '-';
                                 break;
                             case '-':
                                 if (cellSign == '-') // - et - = +
-                                    GlobalVariable.TableColumns[i].ColumnSign = '+';
+                                    tableColumns[i].ColumnSign = '+';
                                 break;
                         }
                     }
@@ -413,7 +414,7 @@ namespace SignaMath
                         // pour être entre la dernière colonne et (;) borne max
                         // TODO: ajouter la borne max à une colonne à part entière
                         string formule = TextBox_Expression.textBox_clear.Text;
-                        double variable = GlobalVariable.TableColumns[i - 1].Value + 0.00000000001;
+                        double variable = tableColumns[i - 1].Value + 0.00000000001;
                         char cellSign = GetSign(formule, variable);
                         userControl_CellSign.Label_Sign.Content = cellSign;
 
@@ -461,11 +462,18 @@ namespace SignaMath
         private void MenuItem_DeleteRow_Click(object sender, RoutedEventArgs? e)
         {
             // S'enlève de toutes les colonnes
-            GlobalVariable.TableColumns.ForEach(x => x.FromRows.Remove(this.RowId));
+            if (RowType == RowType.CONCLUANTE)
+            {
+                MainWindow._MainWindow.Button_AjoutLigneConcluante_Click(this, null);
+            }
+            else
+            {
+                GlobalVariable.TableColumns.ForEach(x => x.FromRows.Remove(this.RowId));
 
-            MainWindow._MainWindow.UC_TableauDeSigne.StackPanel_Row.Children.Remove(this);
+                MainWindow._MainWindow.UC_TableauDeSigne.StackPanel_Row.Children.Remove(this);
 
-            GlobalVariable.UpdateBoard();
+                GlobalVariable.UpdateBoard();
+            }
         }
 
         /// <summary>
