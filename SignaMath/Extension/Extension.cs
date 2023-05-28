@@ -32,8 +32,6 @@ namespace SignaMath.Extension
         // Méthode qui écrit un élément UI dans un fichier PNG ou le copie dans le presse-papiers
         internal static void WriteToPng(UIElement element, string filename, bool copyClipboard = false)
         {
-            MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Wait;
-
             // Création d'un rectangle pour définir la taille de l'élément
             var rect = new Rect(element.RenderSize);
             var visual = new DrawingVisual();
@@ -73,8 +71,6 @@ namespace SignaMath.Extension
                 // Copie de l'image dans le presse-papiers
                 Clipboard.SetImage(bitmap);
             }
-
-            MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
         }
 
         /// <summary>

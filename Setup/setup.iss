@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SignaMath"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "zonetecde"
 #define MyAppURL "github.com/zonetecde/SignaMath"
 #define MyAppExeName "SignaMath.exe"

@@ -23,6 +23,11 @@ namespace SignaMath.UC
         public UserControl_TableauDeSigne()
         {
             InitializeComponent();
+
+            this.Loaded += (sender, e) =>
+            {
+                StackPanel_Row.Children.Add(new UserControl_Row(Classes.RowType.HEADER, 0));
+            };
         }
     }
 }

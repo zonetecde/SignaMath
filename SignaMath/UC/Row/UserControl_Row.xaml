@@ -21,15 +21,19 @@
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Background="White" Grid.Column="0" MouseLeftButtonUp="Border_MouseLeftButtonUp">
+                <Border x:Name="leftColumn"  Background="White" Grid.Column="0" MouseLeftButtonUp="Border_MouseLeftButtonUp">
                     <local:UserControl_FormulaTextBox x:Name="TextBox_Expression"/>
                 </Border>
-                <GridSplitter Grid.Column="1" Width="2" Background="Gray" HorizontalAlignment="Stretch"/>
+                
+                <GridSplitter Grid.Column="1" Width="2" Background="Gray" HorizontalAlignment="Stretch" />
 
                 <Border Background="White" Grid.Column="2">
-                    <Grid x:Name="Grid_RightSide">
+                    <Grid x:Name="Grid_RowContainer">
+                        <Grid x:Name="Grid_RowColumns">
 
+                        </Grid>
                     </Grid>
+
                 </Border>
             </Grid>
         </Border>

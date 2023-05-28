@@ -1,6 +1,8 @@
 ﻿using ClassLibrary;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
+using SignaMath.Classes;
+using SignaMath.UC;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,12 +17,13 @@ namespace SignaMath
     /// </summary>
     public partial class MainWindow : Window
     {
-        internal static string VariableName { get; set; } = "x";
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.1";
+        private const string VERSION = "1.0.2";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
+
+        internal static UserControl_TableauDeSigne TableauDeSigne { get; set; }
 
         public MainWindow()
         {
@@ -28,31 +31,32 @@ namespace SignaMath
 
             _MainWindow = this;
             Run_Version.Text = VERSION;
+            TableauDeSigne = UC_TableauDeSigne;
 
             // Change la taille des lignes dans le tableau pour la taille souhaitée.
             HeightHeaderSlider.ValueChanged += (sender, e) =>
             {
-                TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TopRow>().ToList().ForEach(x =>
+                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
                 {
-                    x.Height = e.NewValue;
+                    if(x.RowType == RowType.HEADER)
+                        x.Height = e.NewValue;
                 });
             };
             HeightTableauDeVariationSlider.ValueChanged += (sender, e) =>
             {
-                TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList().ForEach(x =>
+                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
                 {
-                    x.Height = e.NewValue;
+                    if (x.RowType == RowType.TABLEAU_DE_VARIATION)
+                        x.Height = e.NewValue;
                 });
             };
             HeightRowSlider.ValueChanged += (sender, e) =>
             {
-                foreach (var control in TableauDeSigne.StackPanel_Row.Children)
+                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
                 {
-                    if (control is UserControl_Row || control is UserControl_BottomRow)
-                    {
-                        ((FrameworkElement)control).Height = e.NewValue;
-                    }
-                }
+                    if (x.RowType != RowType.HEADER)
+                        x.Height = e.NewValue;
+                });
             };
         }
 
@@ -62,7 +66,7 @@ namespace SignaMath
         /// </summary>
         private void Button_AddRow_Click(object sender, RoutedEventArgs e)
         {
-            TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row((UserControl_TopRow)TableauDeSigne.StackPanel_Row.Children[0], new Random().Next(999999)) { Height = HeightRowSlider.Value });
+            UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
 
             button_AjoutLigneConcluante.IsEnabled = true;
             button_AjoutTableauVariation.IsEnabled = true;
@@ -78,19 +82,19 @@ namespace SignaMath
         {
             if (button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
             {
-                TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_BottomRow() { Height = HeightRowSlider.Value });
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.CONCLUANTE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
                 button_AjoutLigneConcluante.Content = "Supprimer la ligne concluante";
             }
             else
             {
-                TableauDeSigne.StackPanel_Row.Children.Remove(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList()[0]);
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.CONCLUANTE));
                 button_AjoutLigneConcluante.Content = "Ajouter la ligne concluante";
 
                 // supprime aussi le tableau de variation
                 if (button_AjoutTableauVariation.Content.ToString()!.Contains("Supprimer"))
                 {
                     button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
-                    TableauDeSigne.StackPanel_Row.Children.Remove(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList()[0]);
+                    UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().FindAll(x => x.RowType == RowType.TABLEAU_DE_VARIATION).First());
                 }
             }
         }
@@ -101,7 +105,7 @@ namespace SignaMath
         /// </summary>
         private void Button_AddForbiddenValueRow_Click(object sender, RoutedEventArgs e)
         {
-            TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row((UserControl_TopRow)TableauDeSigne.StackPanel_Row.Children[0], new Random().Next(999999), true) { Height = HeightRowSlider.Value });
+            UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE_INTERDITE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
 
             button_AjoutLigneConcluante.IsEnabled = true;
             button_AjoutTableauVariation.IsEnabled = true;
@@ -116,14 +120,17 @@ namespace SignaMath
         {
             if (!button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
             {
-                TableauDeSigne.StackPanel_Row.Children.Remove(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList()[0]);
-                TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_BottomRow() { Height = HeightRowSlider.Value });
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.CONCLUANTE));
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.CONCLUANTE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
             }
 
             if (!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
             {
-                TableauDeSigne.StackPanel_Row.Children.Remove(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList()[0]);
-                TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_TableauDeVariation(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().ToList()[0]) { Height = HeightTableauDeVariationSlider.Value });
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.TABLEAU_DE_VARIATION));
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
+                {
+                    Height = HeightTableauDeVariationSlider.Value,
+                });
             }
         }
 
@@ -140,17 +147,16 @@ namespace SignaMath
                     Button_AjoutLigneConcluante_Click(this, null);
                 }
 
-                UserControl_TableauDeVariation uc = new UserControl_TableauDeVariation(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_BottomRow>().First())
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
                 {
-                    Height= HeightTableauDeVariationSlider.Value,
-                };
-                TableauDeSigne.StackPanel_Row.Children.Add(uc);
+                    Height = HeightTableauDeVariationSlider.Value,
+                });
 
                 button_AjoutTableauVariation.Content = "Supprimer le tableau de variation";
             }
             else
             {
-                TableauDeSigne.StackPanel_Row.Children.Remove(TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TableauDeVariation>().ToList()[0]);
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().FindAll(x => x.RowType == RowType.TABLEAU_DE_VARIATION).First());
                 button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
             }
         }
@@ -168,6 +174,7 @@ namespace SignaMath
             {
                 try
                 {
+                    MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Wait;
                     Extension.Extension.WriteToPng(viewBox_tableau, dialog.FileName + @"\tableau" + DateTime.Now.ToString("hh_mm_ss") + ".png");
                     try
                     {
@@ -177,8 +184,11 @@ namespace SignaMath
                 }
                 catch
                 {
-                    MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
                     MessageBox.Show("Désolé, un problème est survenu !");
+                }
+                finally
+                {
+                    MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
                 }
             }
         }
@@ -209,11 +219,15 @@ namespace SignaMath
         {
             try
             {
+                MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Wait;
                 Extension.Extension.WriteToPng(viewBox_tableau, string.Empty, true);
             }
             catch
             {
                 MessageBox.Show("Désolé, un problème est survenu !");
+            }
+            finally
+            {
                 MainWindow._MainWindow.Cursor = System.Windows.Input.Cursors.Arrow;
             }
         }
@@ -334,15 +348,16 @@ namespace SignaMath
         /// <summary>
         /// Supprime toutes les rows du tableau
         /// </summary>
-        private void Button_ClearAll_Click(object sender, RoutedEventArgs e)
+        private void Button_ResetBoard_Click(object sender, RoutedEventArgs e)
         {
-            TableauDeSigne.StackPanel_Row.Children.RemoveRange(1, TableauDeSigne.StackPanel_Row.Children.Count - 1);
-            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TopRow>().First().RightSideElements.Clear();
-            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TopRow>().First().UpdateRightSideElement();
-            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TopRow>().First().Txtbox_BornLeft.textBox_clear.Text = "-\\infty";
-            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_TopRow>().First().Txtbox_BornRight.textBox_clear.Text = "+\\infty";
+            TableauDeSigne.StackPanel_Row.Children.RemoveRange(1, TableauDeSigne.StackPanel_Row.Children.Count -1);
+            GlobalVariable.TableColumns.Clear();
             button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
             button_AjoutLigneConcluante.Content = "Ajouter la ligne concluante";
+            button_AjoutTableauVariation.IsEnabled = false;
+            button_AjoutLigneConcluante.IsEnabled = false;
+
+            GlobalVariable.UpdateBoard();
         }
     }
 }

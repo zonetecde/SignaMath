@@ -13,6 +13,11 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- RESSOURCES -->
+        <Image x:Name="img_arrowTemplateTop" Source="/assets/arrow_top.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed"/>
+        <Image x:Name="img_arrowTemplateBottom" Source="assets/arrow_bottom.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed"/>
+        <!-- -->
+        
         <Border  Grid.Row="0" Margin="20,20,20,0">
             <StackPanel>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="0,0,0,-5" Margin="0,0,0,5">
@@ -37,7 +42,7 @@
 
                     </StackPanel>
 
-                        <Button Content="Tout effacer" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="25" Background="#FFFFFBFB" FontSize="14" Click="Button_ClearAll_Click"/>
+                        <Button Content="Tout effacer" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="25" Background="#FFFFFBFB" FontSize="14" Click="Button_ResetBoard_Click"/>
                     </Grid>
 
                 </ScrollViewer>
@@ -63,7 +68,7 @@
         </Border>
 
         <Viewbox x:Name="viewBox_tableau" Grid.Row="1" Margin="50,10,50,35" >
-            <local:UserControl_TableauDeSigne  Width="{Binding ElementName=WidthSlider, Path=Value}" MinHeight="{Binding ElementName=HeightSlider, Path=Value}"  x:Name="TableauDeSigne"/>
+            <local:UserControl_TableauDeSigne  Width="{Binding ElementName=WidthSlider, Path=Value}" MinHeight="{Binding ElementName=HeightSlider, Path=Value}" x:Name="UC_TableauDeSigne"/>
         </Viewbox>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,5"  HorizontalAlignment="Center" VerticalAlignment="Bottom" >

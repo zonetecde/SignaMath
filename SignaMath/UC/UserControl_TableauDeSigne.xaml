@@ -11,7 +11,6 @@
                 VerticalAlignment="Center"
                 Grid.Row="1">
             <StackPanel x:Name="StackPanel_Row" >
-                <local:UserControl_TopRow/>
             </StackPanel>
         </Border>
     </Grid>

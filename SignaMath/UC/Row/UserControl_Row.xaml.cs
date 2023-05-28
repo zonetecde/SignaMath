@@ -1,12 +1,13 @@
 ﻿using AngouriMath;
 using AngouriMath.Extensions;
 using SignaMath.Classes;
+using SignaMath.UC;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace SignaMath
 {
@@ -16,58 +17,161 @@ namespace SignaMath
     public partial class UserControl_Row : UserControl
     {
         internal List<string> RightSideElement = new List<string>();
-        public UserControl_TopRow UcTopRow { get; set; }
+        public RowType RowType { get; }
         public int RowId { get; private set; }
-        public bool ValeurInterdite { get; }
 
-        public UserControl_Row(UserControl_TopRow UcTopRow, int rowId, bool valeurInterdite = false)
+        public UserControl_Row(RowType rowType, int rowId)
         {
             InitializeComponent();
-            this.UcTopRow = UcTopRow;
+
+            // Défini le type de la ligne
+            RowType = rowType;
+            // Id de la ligne
             RowId = rowId;
-            ValeurInterdite = valeurInterdite;
 
-            // Change le tableau de cellSign en fonction de la nouvelle formule entrée
-            TextBox_Expression.FormulaChanged += (equation) =>
+            // Lorsque l'utilisateur écris une nouvelle formule, trigger l'évènement FormulaChanged.
+            // Si la row est une ligne concluante, on ne vérifie pas ce que l'utilisateur a marqué
+            // donc il n'y a aucun event à trigger
+            if (rowType != RowType.CONCLUANTE && rowType != RowType.TABLEAU_DE_VARIATION)
+                TextBox_Expression.FormulaChanged += FormulaChanged;
+            else
             {
-                equation += " = 0";
-
-                // si l'équation n'a pas de x, c'est un seul nombre simple qui n'a pas de solution
-                Entity? solutions = null;
-
-                if (equation.Contains(MainWindow.VariableName))
+                // Comme c'est une ligne concluante, on laisse l'utilisateur écrire ce qu'il veut comme nom de fonction
+                // sans vérifier
+                TextBox_Expression.DirectWriting = true;
+                if (rowType == RowType.CONCLUANTE)
                 {
-                    Entity equationExpression = MathS.FromString(equation);
-                    solutions = equationExpression.Solve(MainWindow.VariableName);
+                    TextBox_Expression.formulaControl_formatted.Formula = "f'(" + GlobalVariable.VariableName + ")";
+                    TextBox_Expression.textBox_clear.Text = "f'(" + GlobalVariable.VariableName + ")";
                 }
+                else if (rowType == RowType.TABLEAU_DE_VARIATION)
+                {
+                    TextBox_Expression.formulaControl_formatted.Formula = "f(" + GlobalVariable.VariableName + ")";
+                    TextBox_Expression.textBox_clear.Text = "f(" + GlobalVariable.VariableName + ")";
+                }
+            }
 
-                // S'enlève de toutes les colonnes
-                UcTopRow.RightSideElements.ForEach(x => x.FromRows.Remove(this.RowId));
+            // Si c'est une row dans laquelle il faut marqué une expression,
+            // met le Focus sur la textBox_Expression pour que l'utilisateur écrit une formule
+            if (rowType == RowType.MIDDLE || rowType == RowType.MIDDLE_INTERDITE)
+                this.Loaded += (sender, e) =>
+                {
+                    TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
+                };
 
-                // S'ajoute les colonnes nécessaire pour dresser le tableau de cellSign de cette expression
-                if (solutions != null) // = pas de solution
-                    foreach (var solution in solutions!.Stringize().Split(','))
+            // Si c'est la première row du tableau, alors on ajoute les 2 intervalles
+            // et on set le nom de la variable
+            if(RowType == RowType.HEADER)
+            {
+                // Set le nom de la variable est la limite à un de longueur max (= 1 caractère)
+                TextBox_Expression.textBox_clear.Text = Char.ToString(GlobalVariable.VariableName);
+                TextBox_Expression.textBox_clear.MaxLength = 1; 
+
+                // Créé les bornes
+                UserControl_FormulaTextBox uc_borneMin = new();
+                uc_borneMin.HorizontalAlignment = HorizontalAlignment.Left;
+                uc_borneMin.Margin = new Thickness(20, 0, 0, 0);
+                uc_borneMin.textBox_clear.Text = "-\\infty";
+                uc_borneMin.DirectWriting = true;
+                uc_borneMin.FormulaChanged += (newIntervalMin) => { GlobalVariable.IntervalleMin = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin); GlobalVariable.UpdateBoard(); };
+                UserControl_FormulaTextBox uc_borneMax = new();
+                uc_borneMax.HorizontalAlignment = HorizontalAlignment.Right;
+                uc_borneMax.Margin = new Thickness(0, 0, 20, 0);
+                uc_borneMax.textBox_clear.Text = "+\\infty";
+                uc_borneMax.DirectWriting = true;
+                uc_borneMax.FormulaChanged += (newIntervalMax) => { GlobalVariable.IntervalleMax = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax); GlobalVariable.UpdateBoard(); };
+
+                Grid_RowContainer.Children.Add(uc_borneMin);
+                Grid_RowContainer.Children.Add(uc_borneMax);
+            }
+
+            // Update tout le tableau si c'est une ligne concluante ou un tableau de variation pour mettre à jour ses valeurs
+            if (RowType == RowType.CONCLUANTE || RowType == RowType.TABLEAU_DE_VARIATION)
+                this.Loaded += (s, e) =>
+                {
+                    GlobalVariable.UpdateBoard();
+                };
+        }
+
+        /// <summary>
+        /// La TextBox gauche d'une ligne du tableau possède une nouvelle formule mathématique
+        /// Change en conséquence le tableau
+        /// </summary>
+        /// <param name="newFormula">La nouvelle formule de l'utilisateur</param>
+        private void FormulaChanged(string newFormula)
+        {
+            switch (RowType)
+            {
+                // Si c'est la première ligne du tableau, dans ce cas
+                // c'est le nom de la variable qui a changé
+                case RowType.HEADER:
+                    // Vérifie que le nouveau nom de variable est tout sauf un chiffre
+                    // et que la variable est composé que d'un caractère
+                    if (char.IsDigit(Convert.ToChar(newFormula)) && newFormula.Length == 1)
+                        // Va donner une indications visuelle à l'utilisateur que 
+                        // le nom de la variable écrite n'est pas correct.
+                        throw new Exception();
+
+                    // Le nom de la variable est correcte, change donc toutes les formules
+                    // des rows avec le nouveau nom de variable
+                    MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().FindAll(x => x.RowType != RowType.HEADER).ForEach(uc =>
                     {
-                        var _solution = solution.Replace("{ ", string.Empty).Replace(" }", string.Empty);
+                        uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(GlobalVariable.VariableName, Convert.ToChar(newFormula));
+                    });
 
-                        string strApproximative = _solution.EvalNumerical().Stringize();
+                    // Change dans les paramètres globaux le nom de la variable par le nouveau
+                    GlobalVariable.VariableName = Convert.ToChar(newFormula);
 
+                    break;
+
+                // Si c'est une ligne contenant une expression mathématique qui contribue
+                // à l'étude du signe
+                case RowType.MIDDLE:
+                case RowType.MIDDLE_INTERDITE:
+                    // On transforme la formule donné par l'utilisateur en équation pour trouver
+                    // les endroits où la courbe coupe la ligne à l'ordonné Y
+                    string equation = newFormula + " = " + GlobalVariable.Y;
+
+                    // On va recalculer avec la nouvelle formule ses solutions, donc
+                    // on enlève les colonnes du tableau des anciennes solutions trouvées.
+                    GlobalVariable.TableColumns.ForEach(x => x.FromRows.Remove(this.RowId));
+
+                    // Si l'équation n'a pas de x, c'est un seul nombre simple qui n'a pas de solution
+                    // Dans ce cas, on skip toute la partie qui permet de trouver et d'ajouter les 
+                    // solutions aux colonnes du tableau.
+                    if (!equation.Contains(GlobalVariable.VariableName))
+                        break;
+
+                    // Trouve les résultats de l'équation en fonction de la variable à trouver
+                    Entity equationExpression = MathS.FromString(equation);
+                    Entity solutions = equationExpression.Solve(Char.ToString(GlobalVariable.VariableName));
+
+                    // On énumère toutes les solutions trouvées
+                    foreach (var solution in solutions!.Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty).Split(','))
+                    {
+                        // COMMENT TODO
+                        string strApproximative = solution.EvalNumerical().Stringize();
+
+                        // Si la solution est une solution parmis les réels (= pas de variable 'i')
                         if (!strApproximative.Contains('i'))
                         {
+                            // Calcul une approximation de la solution (dans le cas où elle contient un nombre aux décimals infinis)
                             double approximation = Extension.Extension.StrToDouble(strApproximative);
 
-                            // si la colonne existe déjà on s'ajoute à la liste des rows concerné, sinon on ajoute la colonne
-                            var column = UcTopRow.RightSideElements.FirstOrDefault(x => x.Expression == _solution);
+                            // On regarde si une colonne dans le tableau existe déjà contenant cette solution
+                            var column = GlobalVariable.TableColumns.FirstOrDefault(x => x.Expression == solution);
+
+                            // Si la colonne existe déjà, on ajoute cette row à la liste de la colonne 
+                            // contenant toutes les rows pour laquelle elle est une solution
                             if (column != default)
-                            {
-                                // La colonne existe déjà, on ajoute son Id
-                                column.FromRows.Add(rowId);
-                            }
+                                column.FromRows.Add(RowId);
+
                             else
                             {
-                                // Aucune colonne existe
-                                ColumnElement columnElement = new ColumnElement(_solution, approximation, 0, new List<int> { rowId });
-                                UcTopRow.RightSideElements.Add(columnElement);
+                                // Sinon, on ajoute une nouvelle colonne au tableau
+                                // avec comme row concerné cette row-ci.
+                                ColumnElement columnElement = new ColumnElement(solution, approximation, new List<int> { RowId });
+                                GlobalVariable.TableColumns.Add(columnElement);
                             }
                         }
                         else
@@ -75,210 +179,328 @@ namespace SignaMath
                             // Une solution existe, mais elle n'est pas réel
                         }
                     }
+                    break;
+            }
 
-                UcTopRow.UpdateRightSideElement();
-            };
-
-
-            this.Loaded += (sender, e) =>
-            {
-                // Curseur pour écrire une formule
-                TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
-            };
+            // Met à jour l'entiereté du tableau
+            GlobalVariable.UpdateBoard();
         }
 
+        /// <summary>
+        /// Dresse les colonnes de cette ligne et calcul son signe
+        /// </summary>
         internal void UpdateRow()
         {
-            Grid_RightSide.Children.Clear();
-            Grid_RightSide.ColumnDefinitions.Clear();
+            Console.WriteLine("update row : " + RowType.ToString());
 
-            // place les colonnes de la row
-            for (int i = 0; i < UcTopRow.RightSideElements.Count + 1; i++)
+            // Commence par supprimer les anciennes colonnes placées
+            Grid_RowColumns.Children.Clear();
+            Grid_RowColumns.ColumnDefinitions.Clear();
+
+            // Ajoute, pour chaque colonne du tableau, une colonne dans la ligne
+            // Le `i` va de 0 à `nombre de colonne + 1` car sinon il manquerait la dernière case dans la row
+            for (int i = 0; i < GlobalVariable.TableColumns.Count + 1; i++)
             {
-                // Vérifie que la colonne est comprise entre les bornes
-                if (i != UcTopRow.RightSideElements.Count)
-                    if (!(UcTopRow.RightSideElements[i].Value > ColumnElement.IntervalleMin && UcTopRow.RightSideElements[i].Value < ColumnElement.IntervalleMax))
-                    {
-                        if (UcTopRow.RightSideElements[i].Value < ColumnElement.IntervalleMax)
-                        {
-                            // càd que la dernière colonne etait celle juste avant, donc on set le signe de la dernière colonne
-                        }
+                // Vérifie que la colonne est comprise dans l'intervalle du tableau
+                if (i != GlobalVariable.TableColumns.Count)
+                    if (!(GlobalVariable.TableColumns[i].Value > GlobalVariable.IntervalleMin && GlobalVariable.TableColumns[i].Value < GlobalVariable.IntervalleMax))
+                        // La valeur n'est pas comprise dans l'intervalle du tableau; on n'affiche pas cette colonne
                         continue;
-                    }
 
-                Grid_RightSide.ColumnDefinitions.Add(new ColumnDefinition()); // contient le cellSign
+                // Ajoute la colonne
+                Grid_RowColumns.ColumnDefinitions.Add(new ColumnDefinition());
 
-                Grid gridElement = new Grid();
-
-                Label label_signe = new Label()
+                // Si c'est la ligne header
+                if (RowType == RowType.HEADER)
                 {
-                    HorizontalContentAlignment = HorizontalAlignment.Center,
-                    VerticalContentAlignment = VerticalAlignment.Center,
-                    FontSize = 24
-                };
-
-                label_signe.Cursor = Cursors.Hand;
-
-                label_signe.PreviewMouseLeftButtonUp += (sender, e) =>
-                {
-                    label_signe.Content = label_signe.Content.ToString() == "+" ? '-' : '+';
-                };
-
-                gridElement.Children.Add(label_signe);
-
-                Border container = new Border()
-                {
-                    BorderBrush = Brushes.Black,
-                    // pour pas qu'il y a un mauvais rendu visuelle sur la dernière cellule droite il y a une condition
-                    BorderThickness = i != UcTopRow.RightSideElements.Count ? new Thickness(0, 0, 2, 0) : new Thickness(0)
-                };
-
-
-                // Si ce n'est pas la dernière colonne
-                if (i != UcTopRow.RightSideElements.Count)
-                {
-                    // Si l'expression de cette row s'annule au nombre de la colonne, on place un 0
-                    if (UcTopRow.RightSideElements[i].FromRows.Contains(RowId))
+                    // Si ce n'est pas la dernière colonne
+                    if (i != GlobalVariable.TableColumns.Count)
                     {
-                        // si c'est une valeur interdite pas de 0 mais double barre
-                        if (ValeurInterdite)
+                        // Création du texte contenant la solution (le 'nombre' de la colonne)
+                        UserControl_FormulaTextBox uc = new UserControl_FormulaTextBox()
                         {
-                            UcTopRow.RightSideElements[i].ValeurInterdite = true;
+                            VerticalAlignment = VerticalAlignment.Center,
+                            HorizontalAlignment = HorizontalAlignment.Right,
+                        };
 
-                            Border secondBar = new Border()
-                            {
-                                BorderBrush = Brushes.Black,
-                                HorizontalAlignment = HorizontalAlignment.Right,
-                                Margin = new Thickness(0, 0, 5, 0),
-                                BorderThickness = new Thickness(0, 0, 2, 0)
-                            };
+                        // Set le 'nombre' de la colonne
+                        uc.textBox_clear.Text = GlobalVariable.TableColumns[i].Expression;
 
-                            gridElement.Children.Add(secondBar);
-                        }
-                        else
+                        // Permet de centrer le texte avec les colonnes
+                        uc.Loaded += (sender, e) =>
                         {
-                            // Ce n'est pas une valeur interdite on rajoute 0
-                            Label label_0 = new Label();
-                            label_0.VerticalAlignment = VerticalAlignment.Center;
-                            label_0.HorizontalAlignment = HorizontalAlignment.Right;
-                            label_0.Margin = new Thickness(0, 0, -12, 0);
-                            label_0.FontSize = 24;
-                            label_0.Content = "0";
-                            gridElement.Children.Add(label_0);
-                        }
-                    }
+                            uc.Margin = new Thickness(0, 0, (uc.ActualWidth / 2) * -1, 0);
+                        };
 
-                    // Enfin, place le cellSign de l'expression pour la borne donné
-                    string formule = TextBox_Expression.textBox_clear.Text;
-                    double variable = UcTopRow.RightSideElements[i].Value - 0.00000000001;
+                        // Ajoute le texte à la colonne
+                        Grid.SetColumn(uc, i);
 
-                    char cellSign = GetSign(formule, variable);
-                    label_signe.Content = cellSign;
-
-                    char columnSign = UcTopRow.RightSideElements[i].ColumnSign;
-
-                    switch (columnSign)
-                    {
-                        case '+':
-                            if (cellSign == '-')
-                                UcTopRow.RightSideElements[i].ColumnSign = '-';
-                            break;
-                        case '-':
-                            if (cellSign == '-')
-                                UcTopRow.RightSideElements[i].ColumnSign = '+';
-                            break;
-                    }
-                }
-                else
-                {
-                    // Si c'est un nombre seul (ex : 5) (car il n'y a pas de colonne)
-                    if (!UcTopRow.RightSideElements.Any(x => x.FromRows.Contains(RowId)))
-                    {
-                        // on convert l'expression (elle peut être une fraction, comme -3/4)
-                        string expBrute = TextBox_Expression.textBox_clear.Text;
-                        double approximation = Extension.Extension.StrToDouble(expBrute, true);
-
-                        label_signe.Content = approximation >= 0 ? '+' : '-';
+                        // Ajoute le nombre à la row header
+                        Grid_RowColumns.Children.Add(uc);
                     }
                     else
                     {
-                        // si c'est la dernière colonne, on prend la variable de la colonne d'avant mais avec un + cette fois
+                        // La dernière colonne n'est là que pour qu'il n'y ai pas de décallage
+                    }
+
+                    continue;
+                }
+
+                // Ajoute le signe de la colonne à cette row si c'est une ligne de signe
+                UserControl_CellSign userControl_CellSign = new UserControl_CellSign(i == GlobalVariable.TableColumns.Count, RowType);
+                Grid.SetColumn(userControl_CellSign, i);
+                Grid_RowColumns.Children.Add(userControl_CellSign);
+
+                // Si c'est une ligne concluante
+                if (RowType == RowType.CONCLUANTE)
+                {
+                    if (i != GlobalVariable.TableColumns.Count)
+                    {
+                        // Ajoute une seconde barre si la colonne contient une valeur interdite
+                        if (GlobalVariable.TableColumns[i].ValeurInterdite)
+                        {
+                            userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
+                        }
+                        // Sinon c'est que la colonne est une colonne solution d'une expression du tableau
+                        // donc qui se coupe en 0 au moins une fois
+                        else
+                        {
+                            userControl_CellSign.Label_Zero.Visibility = Visibility.Visible;
+                        }
+
+                        // Set le signe de la colonne
+                        userControl_CellSign.Label_Sign.Content = GlobalVariable.TableColumns[i].ColumnSign;
+                    }
+                    else
+                    {
+                        // Signe de la dernière colonne
+                        userControl_CellSign.Label_Sign.Content = GlobalVariable.LastColumnSign;
+                    }
+
+                    continue;
+                }
+
+                // Si c'est un tableau de variation
+                if(RowType == RowType.TABLEAU_DE_VARIATION)
+                {
+                    // Récupère le signe de la ligne concluante pour pouvoir orienter la flèche
+                    bool isPlus = (((UserControl_CellSign)MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
+                        .First(x => x.RowType == RowType.CONCLUANTE).Grid_RowColumns.Children[i]))
+                            .Label_Sign.Content.ToString() == "+";
+
+                    // Set l'image de la flèche
+                    userControl_CellSign.Image_Arrow.Source = isPlus ? MainWindow._MainWindow.img_arrowTemplateTop.Source : MainWindow._MainWindow.img_arrowTemplateBottom.Source;
+                    userControl_CellSign.Image_Arrow.Visibility = Visibility.Visible;
+
+                    // Set les valeurs modifiables aux extrémités des flèches
+                    userControl_CellSign.FormulaTextBoxRight.Visibility = Visibility.Visible;
+                    userControl_CellSign.FormulaTextBoxRight.VerticalAlignment = isPlus ? VerticalAlignment.Top : VerticalAlignment.Bottom;
+                    userControl_CellSign.FormulaTextBoxRight.Margin = isPlus ? new Thickness(0, 0, -20, 0) : new Thickness(0, 10.5, -25, 5);
+
+                    // Ajoute la valeur à gauche de la flèche de la première cellule
+                    if (i == 0)
+                    {
+                        userControl_CellSign.FormulaTextBoxLeft.Visibility = Visibility.Visible;
+                        userControl_CellSign.FormulaTextBoxLeft.VerticalAlignment = isPlus ? VerticalAlignment.Bottom : VerticalAlignment.Top;
+                        userControl_CellSign.FormulaTextBoxLeft.Margin = isPlus ? new Thickness(0, 10.5, -20, 5) : new Thickness(0, 0, -20, 0);
+                    }
+
+                    // Si ce n'est pas la dernière colonne
+                    if (i != GlobalVariable.TableColumns.Count)
+                    {
+                        // si c'est une valeur interdite alors double barre
+                        if (GlobalVariable.TableColumns[i].ValeurInterdite)
+                        {
+                            userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
+                            // Pour pas que le texte rentre dans la double barre
+                            userControl_CellSign.FormulaTextBoxRight.Margin = isPlus ? new Thickness(0, 0, 0, 0) : new Thickness(0, 10.5, 0, 5);
+                        }
+                        else
+                        {
+                            // Sinon on met pas du tout de barre
+                            userControl_CellSign.Border_Main.BorderThickness = new Thickness(0, 0, 0, 0);
+                        }
+                    }
+                    else 
+                    {
+                        // Dernière colonne ou double barre, on change la margin pour pas que le label sorte du tableau
+                        userControl_CellSign.FormulaTextBoxRight.Margin = isPlus ? new Thickness(0, 0, 0, 0) : new Thickness(0, 10.5, 0, 5);
+                    }
+
+                    continue;
+                }
+
+                // Si c'est une row d'expression
+                if (RowType == RowType.MIDDLE || RowType == RowType.MIDDLE_INTERDITE)
+                {
+                    // Si l'expression n'a aucune solution c'est quelle est toujours pos ou toujours neg
+                    if (!GlobalVariable.TableColumns.Any(x => x.FromRows.Contains(RowId)) && this.RowType != RowType.CONCLUANTE)
+                    {
+                        // Soit c'est une expression qui contient du x :
+                        if (TextBox_Expression.textBox_clear.Text.Contains(GlobalVariable.VariableName))
+                        {
+                            // Dans ce cas on remplace x par n'importe quel nombre; elle sera toujours du même signe
+                            string formule = TextBox_Expression.textBox_clear.Text;
+                            char cellSign = GetSign(formule, 0);
+                            userControl_CellSign.Label_Sign.Content = cellSign;
+                        }
+                        // Soit c'est une expression seul comme -3/4 :
+                        else
+                        {
+                            // Dans ce cas on convert l'expression en nombre
+                            string expBrute = TextBox_Expression.textBox_clear.Text;
+                            // StrToDouble va renvoyer soit 1 soit -1 en fonction du signe final de l'expression
+                            double approximation = Extension.Extension.StrToDouble(expBrute, true);
+                            userControl_CellSign.Label_Sign.Content = approximation >= 0 ? '+' : '-';
+                        }
+
+                        continue;
+                    }
+
+                    // Si ce n'est pas la dernière colonne
+                    if (i != GlobalVariable.TableColumns.Count)
+                    {
+                        // Si l'expression de cette row s'annulle au numéro de la colonne, on place un 0
+                        // (en d'autre terme, si c'est une solution)
+                        if (GlobalVariable.TableColumns[i].FromRows.Contains(RowId))
+                        {
+                            // Si c'est une ligne de valeur interdite, on ne met pas de `0` mais une double barre
+                            if (RowType == RowType.MIDDLE_INTERDITE)
+                            {
+                                // Set la colonne entière en tant que valeur interdite (pour le tableau de variation)
+                                GlobalVariable.TableColumns[i].ValeurInterdite = true;
+
+                                // Affiche la seconde barre
+                                userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                // Ce n'est pas une valeur interdite, on affiche le '0'
+                                userControl_CellSign.Label_Zero.Visibility = Visibility.Visible;
+                            }
+                        }
+
+                        // Enfin, place le signe de l'expression entre la colonne d'avant et la colonne actuelle
+                        // càd, la colonne actuelle - un nombre très petit
+                        // On récupère donc la formule de l'expression de cette row
                         string formule = TextBox_Expression.textBox_clear.Text;
-                        double variable = UcTopRow.RightSideElements[i - 1].Value + 0.00000000001;
-
+                        // On set la valeur qui va remplacer 'x' par la valeur de la colonne - un nombre très petit
+                        double variable = GlobalVariable.TableColumns[i].Value - 0.00000000001;
+                        // Ainsi, on récupère le signe du résultat
                         char cellSign = GetSign(formule, variable);
-                        label_signe.Content = cellSign;
+                        userControl_CellSign.Label_Sign.Content = cellSign;
 
-                        switch (ColumnElement.LastColumnSign)
+                        // Met à jour le signe de la colonne entière pour la ligne concluante
+                        // en usant de la règle des signes
+                        char columnSign = GlobalVariable.TableColumns[i].ColumnSign;
+
+                        switch (columnSign)
+                        {
+                            case '+':
+                                if (cellSign == '-') // + et - = -
+                                    GlobalVariable.TableColumns[i].ColumnSign = '-';
+                                break;
+                            case '-':
+                                if (cellSign == '-') // - et - = +
+                                    GlobalVariable.TableColumns[i].ColumnSign = '+';
+                                break;
+                        }
+                    }
+                    // Si c'est la dernière colonne (= après on a la borne max)
+                    else
+                    {
+                        // si c'est la dernière colonne, on prend la variable de la colonne d'avant mais avec un + cette fois
+                        // pour être entre la dernière colonne et (;) borne max
+                        // TODO: ajouter la borne max à une colonne à part entière
+                        string formule = TextBox_Expression.textBox_clear.Text;
+                        double variable = GlobalVariable.TableColumns[i - 1].Value + 0.00000000001;
+                        char cellSign = GetSign(formule, variable);
+                        userControl_CellSign.Label_Sign.Content = cellSign;
+
+                        // Règle des signes pour la dernière colonne
+                        switch (GlobalVariable.LastColumnSign)
                         {
                             case '+':
                                 if (cellSign == '-')
-                                    ColumnElement.LastColumnSign = '-';
+                                    GlobalVariable.LastColumnSign = '-';
                                 break;
                             case '-':
                                 if (cellSign == '-')
-                                    ColumnElement.LastColumnSign = '+';
+                                    GlobalVariable.LastColumnSign = '+';
                                 break;
                         }
-
                     }
                 }
-
-                container.Child = gridElement;
-                Grid.SetColumn(container, i);
-
-                Grid_RightSide.Children.Add(container);
             }
 
         }
 
+        /// <summary>
+        /// Donné une expression avec `x` et une variable, retourne le signe du résultat
+        /// </summary>
+        /// <param name="formule">La formule où il faut rempalcer `x`</param>
+        /// <param name="variable">La variable qui va remplacer `x` dans la formule</param>
+        /// <returns>Le signe du résultat : '+' ou '-'</returns>
         private static char GetSign(string formule, double variable)
         {
             Entity expr = formule.ToEntity();
 
-            // Remplace x par -5.3
-            Entity replacedExpr = expr.Substitute(MainWindow.VariableName, variable);
-            // Évalue l'expression
+            // Remplace la VariableName par la variable
+            Entity replacedExpr = expr.Substitute(Char.ToString(GlobalVariable.VariableName), variable);
             var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
-
             double approximation = Extension.Extension.StrToDouble(result);
 
-            // Obtiens le cellSign du résultat
+            // Obtiens le signe du résultat
             char sign = approximation >= 0 ? '+' : '-';
             return sign;
         }
 
+        /// <summary>
+        /// Supprime la ligne du tableau
+        /// </summary>
         private void MenuItem_DeleteRow_Click(object sender, RoutedEventArgs? e)
         {
             // S'enlève de toutes les colonnes
-            UcTopRow.RightSideElements.ForEach(x => x.FromRows.Remove(this.RowId));
+            GlobalVariable.TableColumns.ForEach(x => x.FromRows.Remove(this.RowId));
 
-            MainWindow._MainWindow.TableauDeSigne.StackPanel_Row.Children.Remove(this);
+            MainWindow._MainWindow.UC_TableauDeSigne.StackPanel_Row.Children.Remove(this);
 
-            UcTopRow.UpdateRightSideElement();
+            GlobalVariable.UpdateBoard();
         }
 
+        /// <summary>
+        /// Met le focus sur la zone de texte
+        /// </summary>
         private void Border_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
         }
 
+        /// <summary>
+        /// Affiche bouton 'supprimer' si c'est une ligne supprimable
+        /// </summary>
         private void UserControl_MouseEnter(object sender, MouseEventArgs e)
         {
-            // Affiche bouton 'supprimer'
-            button_Supprimer.Visibility = Visibility.Visible;
+            if(RowType != RowType.HEADER)
+                button_Supprimer.Visibility = Visibility.Visible;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            // supprime la row
-            MenuItem_DeleteRow_Click(this, null);
-        }
-
+        /// <summary>
+        /// Cache bouton 'supprimer'
+        /// </summary>
         private void UserControl_MouseLeave(object sender, MouseEventArgs e)
         {
             // cache bouton 'supprimer'
             button_Supprimer.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Supprime la ligne du tableau
+        /// </summary>
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            // supprime la row
+            MenuItem_DeleteRow_Click(this, null);
         }
     }
 }
