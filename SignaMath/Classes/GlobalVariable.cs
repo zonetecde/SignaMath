@@ -8,9 +8,13 @@ namespace SignaMath.Classes
 {
     internal static class GlobalVariable
     {
+        // Défini si la row ajouté doit être focus
+        // Utilisé lorsque l'utilisateur écris une fonction entière
+        internal static bool AllowFocusWhenAdded { get; set; } = true;
+
         // Défini la ligne d'ordonné où l'on veut voir si la courbe la coupe
         // Par défaut : 0 -> Permet d'étudier le signe
-        internal static int Y { get; set; } = 0;
+        internal static double Y { get; set; } = 0;
 
         // Défini le nom de la variable dans l'équation. Elle peut être qu'un 
         // caractère non-numérique.
@@ -48,6 +52,16 @@ namespace SignaMath.Classes
 
             // Met à jour toutes les rows du tableau de signe
             MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => x.UpdateRow());
+        }
+
+        /// <summary>
+        /// Met à jour l'entiereté des calculs du tableau de signe
+        /// </summary>
+        internal static void UpdateColumn()
+        {
+            MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => {
+                x.FormulaChanged(x.TextBox_Expression.textBox_clear.Text);
+            });
         }
     }
 }

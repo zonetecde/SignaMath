@@ -1,13 +1,18 @@
 ﻿using ClassLibrary;
+using HonkSharp.Fluency;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
 using SignaMath.Classes;
+using SignaMath.Extension;
 using SignaMath.UC;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Windows;
 
 namespace SignaMath
@@ -19,7 +24,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.4";
+        private const string VERSION = "1.0.5";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -36,35 +41,127 @@ namespace SignaMath
             // Change la taille des lignes dans le tableau pour la taille souhaitée.
             HeightHeaderSlider.ValueChanged += (sender, e) =>
             {
-                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
-                {
-                    if(x.RowType == RowType.HEADER)
-                        x.Height = e.NewValue;
-                });
+                ChangeRowHeight(e.NewValue, RowType.HEADER);
             };
             HeightTableauDeVariationSlider.ValueChanged += (sender, e) =>
             {
-                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
-                {
-                    if (x.RowType == RowType.TABLEAU_DE_VARIATION)
-                        x.Height = e.NewValue;
-                });
+                ChangeRowHeight(e.NewValue, RowType.TABLEAU_DE_VARIATION);
             };
             HeightRowSlider.ValueChanged += (sender, e) =>
             {
-                UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
-                {
-                    if (x.RowType != RowType.HEADER)
-                        x.Height = e.NewValue;
-                });
+                ChangeRowHeight(e.NewValue, RowType.MIDDLE);
+                ChangeRowHeight(e.NewValue, RowType.MIDDLE_INTERDITE);
+                ChangeRowHeight(e.NewValue, RowType.CONCLUANTE);
             };
+
+            // Set la formula textbox
+            InitFormulaBox();
+
+            formulaTextBox_f.FormulaChanged += ChangeFonctionName;
+            formulaTextBox_content.FormulaChanged += NewFunctionWrited;
+            // Change le côté droit de l'équation
+            formulaBox_y.FormulaChanged += (newY) =>
+            {
+                var d = Extension.Extension.StrToDouble(newY);
+                
+                GlobalVariable.Y = d;
+                GlobalVariable.UpdateColumn();
+            };
+        }
+
+        /// <summary>
+        /// Un nouveau nom de fonction a été donné
+        /// Change en conséquence le nom de la fonction et de la variable
+        /// </summary>
+        /// <param name="newFuncName"></param>
+        private void ChangeFonctionName(string newFuncName)
+        {
+            newFuncName = newFuncName.Trim();
+            if(!newFuncName.EndsWith("="))
+            {
+                formulaTextBox_f.formulaControl_formatted.Formula += "=";
+            }
+
+            if(!String.IsNullOrEmpty(newFuncName))
+            {
+                // change la variable
+                string newVariable = Regex.Match(newFuncName, @"\(([^)]*)\)").Groups[1].Value;
+                if (newVariable.Length == 1)
+                {
+                    // change la lettre de la fonction
+                    UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+                    {
+                        if (x.RowType == RowType.HEADER)
+                            x.TextBox_Expression.textBox_clear.Text = newVariable;
+                    });
+                }
+
+                if (!char.IsDigit(newFuncName[0]))
+                {
+                    // change la lettre de la fonction
+                    UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+                    {
+                        if (x.RowType == RowType.CONCLUANTE)
+                            x.TextBox_Expression.textBox_clear.Text = newFuncName[0].ToString() + "'(" + newVariable + ")";
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Une nouvelle fonction a été écris par l'utilisateur, 
+        /// dresse donc son tableau de signe
+        /// </summary>
+        /// <param name="newFunction">La nouvelle fonction</param>
+        private void NewFunctionWrited(string newFunction)
+        {
+            var rows = Sheller.ShellFunction(newFunction);
+
+            GlobalVariable.AllowFocusWhenAdded = false;
+
+            // clear le tableau
+            Button_ResetBoard_Click(this, null);
+
+            // Ajoute les nouvelles rows
+            foreach(var row in rows)
+            {
+                if(row.Interdite)
+                {
+                    Button_AddForbiddenValueRow_Click(this, null);
+                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = row.Expression;
+                }
+                else
+                {
+                    Button_AddRow_Click(this, null);
+                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = row.Expression;
+                }
+            }
+
+            Button_AjoutLigneConcluante_Click(this, null);
+
+            GlobalVariable.AllowFocusWhenAdded = true;
+        }
+
+
+        /// <summary>
+        /// Change la height d'une colonne si elle admet la condition de Type
+        /// </summary>
+        /// <param name="newValue">La nouvelle valeur</param>
+        /// <param name="rowType">La condition type</param>
+        private void ChangeRowHeight(double newValue, RowType rowType)
+        {
+            UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+            {
+                if (x.RowType == rowType)
+                    x.Height = newValue;
+            });
         }
 
         /// <summary>
         /// Méthode appelée lors du clic sur le bouton "Ajouter une ligne".
         /// Ajoute une ligne au tableau.
         /// </summary>
-        private void Button_AddRow_Click(object sender, RoutedEventArgs e)
+        private void Button_AddRow_Click(object sender, RoutedEventArgs? e)
         {
             UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
 
@@ -103,7 +200,7 @@ namespace SignaMath
         /// Méthode appelée lors du clic sur le bouton "Ajouter une valeur interdite".
         /// Ajoute une ligne au tableau avec une valeur interdite.
         /// </summary>
-        private void Button_AddForbiddenValueRow_Click(object sender, RoutedEventArgs e)
+        private void Button_AddForbiddenValueRow_Click(object sender, RoutedEventArgs? e)
         {
             UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE_INTERDITE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
 
@@ -160,6 +257,28 @@ namespace SignaMath
                 button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
             }
         }
+
+        /// <summary>
+        /// Init les formulas box de la fenêtre principale
+        /// </summary>
+        private void InitFormulaBox()
+        {
+            formulaTextBox_content.textBox_clear.Visibility = Visibility.Hidden;
+            formulaTextBox_content.formulaControl_formatted.Formula = "ecrire\\:une\\:fonction";
+            formulaTextBox_content.AllowEmpty = true;
+            formulaTextBox_content.textBox_clear.MinWidth = formulaTextBox_content.formulaControl_formatted.MinWidth;
+            formulaTextBox_content.textBox_clear.HorizontalAlignment = HorizontalAlignment.Left;
+            formulaTextBox_content.formulaControl_formatted.HorizontalAlignment = HorizontalAlignment.Left;
+
+            formulaTextBox_content.formulaControl_formatted.Visibility = Visibility.Visible;
+
+            formulaTextBox_f.formulaControl_formatted.Formula = "f(x) = ";
+
+            formulaBox_y.textBox_clear.Text = GlobalVariable.Y.ToString();
+            formulaBox_y.textBox_clear.HorizontalContentAlignment = HorizontalAlignment.Left;
+            formulaBox_y.formulaControl_formatted.HorizontalContentAlignment = HorizontalAlignment.Left;
+        }
+
 
         /// <summary>
         /// Méthode appelée lors du clic sur le bouton "Enregistrer".
@@ -348,14 +467,20 @@ namespace SignaMath
         /// <summary>
         /// Supprime toutes les rows du tableau
         /// </summary>
-        private void Button_ResetBoard_Click(object sender, RoutedEventArgs e)
+        private void Button_ResetBoard_Click(object sender, RoutedEventArgs? e)
         {
-            TableauDeSigne.StackPanel_Row.Children.RemoveRange(1, TableauDeSigne.StackPanel_Row.Children.Count -1);
+            TableauDeSigne.StackPanel_Row.Children.RemoveRange(1, TableauDeSigne.StackPanel_Row.Children.Count - 1);
             GlobalVariable.TableColumns.Clear();
             button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
             button_AjoutLigneConcluante.Content = "Ajouter la ligne concluante";
             button_AjoutTableauVariation.IsEnabled = false;
             button_AjoutLigneConcluante.IsEnabled = false;
+
+            if (e != null)
+            {
+                formulaTextBox_content.formulaControl_formatted.Formula = "ecrire\\:une\\:fonction";
+                formulaBox_y.textBox_clear.Text = "0";
+            }
 
             GlobalVariable.UpdateBoard();
         }

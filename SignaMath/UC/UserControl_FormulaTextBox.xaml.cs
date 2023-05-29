@@ -1,5 +1,6 @@
 ﻿using AngouriMath.Extensions;
 using System;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,7 +25,7 @@ namespace SignaMath
         /// <summary>
         /// Gère l'événement de clic gauche sur la zone de texte de formule formatée.
         /// </summary>
-        internal void formulaControl_formatted_MouseLeftButtonDown(object sender, MouseButtonEventArgs? e)
+        internal void formulaControl_formatted_MouseLeftButtonUp(object sender, MouseButtonEventArgs? e)
         {
             textBox_clear.Visibility = Visibility.Visible; // Affiche la zone de texte non formatée
             formulaControl_formatted.Visibility = Visibility.Collapsed; // Masque la zone de texte formatée
@@ -88,14 +89,14 @@ namespace SignaMath
             }
             catch (Exception ex)
             {
-                if (!AllowEmpty)
+                if (AllowEmpty && String.IsNullOrEmpty(textBox_clear.Text))
                 {
-                    textBox_clear.Background = Brushes.LightPink; // Définit le fond de la zone de texte non formatée comme rose clair en cas d'erreur
-                    Console.WriteLine(ex.Message); // Affiche l'exception dans la console
+                    formulaControl_formatted.Formula = string.Empty; // Efface la formule formatée
                 }
                 else
                 {
-                    formulaControl_formatted.Formula = string.Empty; // Efface la formule formatée
+                    textBox_clear.Background = Brushes.LightPink; // Définit le fond de la zone de texte non formatée comme rose clair en cas d'erreur
+                    Console.WriteLine(ex.Message); // Affiche l'exception dans la console
                 }
             }
         }

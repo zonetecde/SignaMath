@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static AngouriMath.Entity;
 
 namespace SignaMath
 {
@@ -20,7 +21,6 @@ namespace SignaMath
         internal List<string> RightSideElement = new List<string>();
         public RowType RowType { get; }
         public int RowId { get; private set; }
-        private bool UpdateAgain = true;
 
         public UserControl_Row(RowType rowType, int rowId)
         {
@@ -55,11 +55,13 @@ namespace SignaMath
 
             // Si c'est une row dans laquelle il faut marqué une expression,
             // met le Focus sur la textBox_Expression pour que l'utilisateur écrit une formule
-            if (rowType == RowType.MIDDLE || rowType == RowType.MIDDLE_INTERDITE)
+            if ((rowType == RowType.MIDDLE || rowType == RowType.MIDDLE_INTERDITE) && GlobalVariable.AllowFocusWhenAdded)
+            {
                 this.Loaded += (sender, e) =>
                 {
-                    TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
+                    TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this, null);
                 };
+            }
 
             // Si c'est la première row du tableau, alors on ajoute les 2 intervalles
             // et on set le nom de la variable
@@ -100,7 +102,7 @@ namespace SignaMath
         /// Change en conséquence le tableau
         /// </summary>
         /// <param name="newFormula">La nouvelle formule de l'utilisateur</param>
-        private void FormulaChanged(string newFormula)
+        internal void FormulaChanged(string newFormula)
         {
             switch (RowType)
             {
@@ -322,7 +324,7 @@ namespace SignaMath
                             userControl_CellSign.Border_Main.BorderThickness = new Thickness(0, 0, 0, 0);
                         }
                     }
-                    else 
+                    else
                     {
                         // Dernière colonne ou double barre, on change la margin pour pas que le label sorte du tableau
                         userControl_CellSign.FormulaTextBoxRight.Margin = isPlus ? new Thickness(0, 0, 0, 0) : new Thickness(0, 10.5, 0, 5);
@@ -436,23 +438,33 @@ namespace SignaMath
 
         }
 
+
         /// <summary>
         /// Donné une expression avec `x` et une variable, retourne le signe du résultat
         /// </summary>
         /// <param name="formule">La formule où il faut rempalcer `x`</param>
         /// <param name="variable">La variable qui va remplacer `x` dans la formule</param>
         /// <returns>Le signe du résultat : '+' ou '-'</returns>
-        private static char GetSign(string formule, double variable)
+        private char GetSign(string formule, double variable)
         {
-            Entity expr = formule.ToEntity();
+            char sign = 'Ø';
 
-            // Remplace la VariableName par la variable
-            Entity replacedExpr = expr.Substitute(Char.ToString(GlobalVariable.VariableName), variable);
-            var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
-            double approximation = Extension.Extension.StrToDouble(result);
+            try
+            {
+                // Obtiens le signe du résultat
+                Entity expr = formule.ToEntity();
 
-            // Obtiens le signe du résultat
-            char sign = approximation >= 0 ? '+' : '-';
+                // Remplace la VariableName par la variable
+                Entity replacedExpr = expr.Substitute(Char.ToString(GlobalVariable.VariableName), variable);
+                var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
+                double app = Extension.Extension.StrToDouble(result);
+                sign = app >= GlobalVariable.Y ? '+' : '-'; ;
+            }
+            catch
+            {
+                TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this,null);
+            }
+
             return sign;
         }
 
@@ -481,7 +493,7 @@ namespace SignaMath
         /// </summary>
         private void Border_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            TextBox_Expression.formulaControl_formatted_MouseLeftButtonDown(this, null);
+            TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this, null);
         }
 
         /// <summary>

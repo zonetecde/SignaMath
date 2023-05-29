@@ -8,7 +8,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" HorizontalAlignment="Center" VerticalAlignment="Center">
     <Grid>
-        <controls:FormulaControl Cursor="IBeam" x:Name="formulaControl_formatted" Margin="0,4,0,0" MouseLeftButtonDown="formulaControl_formatted_MouseLeftButtonDown" Background="#00000000" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+        <controls:FormulaControl Cursor="IBeam" x:Name="formulaControl_formatted" Margin="0,4,0,0" Background="#00000000" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MouseLeftButtonUp="formulaControl_formatted_MouseLeftButtonUp" />
         <TextBox Visibility="Collapsed" x:Name="textBox_clear" Background="Transparent" FontSize="20" LostFocus="textBox_clear_LostFocus" KeyDown="textBox_clear_KeyDown" TextChanged="textBox_clear_TextChanged" BorderThickness="2,2,2,2" BorderBrush="#00ABADB3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
     </Grid>
 </UserControl>
