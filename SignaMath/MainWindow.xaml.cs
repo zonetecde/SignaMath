@@ -24,7 +24,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.5";
+        private const string VERSION = "1.0.6";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 

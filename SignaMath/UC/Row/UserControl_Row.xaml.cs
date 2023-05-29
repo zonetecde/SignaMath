@@ -4,6 +4,7 @@ using SignaMath.Classes;
 using SignaMath.UC;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Windows;
@@ -69,7 +70,8 @@ namespace SignaMath
             {
                 // Set le nom de la variable est la limite à un de longueur max (= 1 caractère)
                 TextBox_Expression.textBox_clear.Text = Char.ToString(GlobalVariable.VariableName);
-                TextBox_Expression.textBox_clear.MaxLength = 1; 
+                TextBox_Expression.textBox_clear.MaxLength = 1;
+                MenuItem_delete.IsEnabled = false;
 
                 // Créé les bornes
                 UserControl_FormulaTextBox uc_borneMin = new();
@@ -134,6 +136,10 @@ namespace SignaMath
                 // à l'étude du signe
                 case RowType.MIDDLE:
                 case RowType.MIDDLE_INTERDITE:
+                    // Remplace les valeurs remarquables :
+                    // Exponentielle :
+                    newFormula = ReplaceValeurRemarquable(newFormula);
+
                     // On transforme la formule donné par l'utilisateur en équation pour trouver
                     // les endroits où la courbe coupe la ligne à l'ordonné Y
                     string equation = newFormula + " = " + GlobalVariable.Y;
@@ -155,34 +161,36 @@ namespace SignaMath
                     // On énumère toutes les solutions trouvées
                     foreach (var solution in solutions!.Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty).Split(','))
                     {
-                        // COMMENT TODO
-                        string strApproximative = solution.EvalNumerical().Stringize();
-
-                        // Si la solution est une solution parmis les réels (= pas de variable 'i')
-                        if (!strApproximative.Contains('i'))
+                        if (!String.IsNullOrEmpty(solution))
                         {
-                            // Calcul une approximation de la solution (dans le cas où elle contient un nombre aux décimals infinis)
-                            double approximation = Extension.Extension.StrToDouble(strApproximative);
+                            string strApproximative = solution.EvalNumerical().Stringize();
 
-                            // On regarde si une colonne dans le tableau existe déjà contenant cette solution
-                            var column = GlobalVariable.TableColumns.FirstOrDefault(x => x.Expression == solution);
+                            // Si la solution est une solution parmis les réels (= pas de variable 'i')
+                            if (!strApproximative.Contains('i'))
+                            {
+                                // Calcul une approximation de la solution (dans le cas où elle contient un nombre aux décimals infinis)
+                                double approximation = Extension.Extension.StrToDouble(strApproximative);
 
-                            // Si la colonne existe déjà, on ajoute cette row à la liste de la colonne 
-                            // contenant toutes les rows pour laquelle elle est une solution
-                            if (column != default)
-                                column.FromRows.Add(RowId);
+                                // On regarde si une colonne dans le tableau existe déjà contenant cette solution
+                                var column = GlobalVariable.TableColumns.FirstOrDefault(x => x.Expression == solution);
 
+                                // Si la colonne existe déjà, on ajoute cette row à la liste de la colonne 
+                                // contenant toutes les rows pour laquelle elle est une solution
+                                if (column != default)
+                                    column.FromRows.Add(RowId);
+
+                                else
+                                {
+                                    // Sinon, on ajoute une nouvelle colonne au tableau
+                                    // avec comme row concerné cette row-ci.
+                                    ColumnElement columnElement = new ColumnElement(solution, approximation, new List<int> { RowId });
+                                    GlobalVariable.TableColumns.Add(columnElement);
+                                }
+                            }
                             else
                             {
-                                // Sinon, on ajoute une nouvelle colonne au tableau
-                                // avec comme row concerné cette row-ci.
-                                ColumnElement columnElement = new ColumnElement(solution, approximation, new List<int> { RowId });
-                                GlobalVariable.TableColumns.Add(columnElement);
+                                // Une solution existe, mais elle n'est pas réel
                             }
-                        }
-                        else
-                        {
-                            // Une solution existe, mais elle n'est pas réel
                         }
                     }
                     break;
@@ -190,6 +198,15 @@ namespace SignaMath
 
             // Met à jour l'entiereté du tableau
             GlobalVariable.UpdateBoard();
+        }
+
+        /// <summary>
+        /// Remplace les valeurs remarquables dans une expression
+        /// </summary>
+        /// <param name="newFormula">L'expression mathématiques</param>
+        private string ReplaceValeurRemarquable(string newFormula)
+        {
+            return newFormula.Replace("e", Math.Exp(1).ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -386,7 +403,7 @@ namespace SignaMath
                         // Enfin, place le signe de l'expression entre la colonne d'avant et la colonne actuelle
                         // càd, la colonne actuelle - un nombre très petit
                         // On récupère donc la formule de l'expression de cette row
-                        string formule = TextBox_Expression.textBox_clear.Text;
+                        string formule = ReplaceValeurRemarquable(TextBox_Expression.textBox_clear.Text);
                         // On set la valeur qui va remplacer 'x' par la valeur de la colonne - un nombre très petit
                         double variable = tableColumns[i].Value - 0.00000000001;
                         // Ainsi, on récupère le signe du résultat
@@ -415,7 +432,7 @@ namespace SignaMath
                         // si c'est la dernière colonne, on prend la variable de la colonne d'avant mais avec un + cette fois
                         // pour être entre la dernière colonne et (;) borne max
                         // TODO: ajouter la borne max à une colonne à part entière
-                        string formule = TextBox_Expression.textBox_clear.Text;
+                        string formule = ReplaceValeurRemarquable(TextBox_Expression.textBox_clear.Text);
                         double variable = tableColumns[i - 1].Value + 0.00000000001;
                         char cellSign = GetSign(formule, variable);
                         userControl_CellSign.Label_Sign.Content = cellSign;
@@ -462,7 +479,7 @@ namespace SignaMath
             }
             catch
             {
-                TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this,null);
+                //TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this,null);
             }
 
             return sign;

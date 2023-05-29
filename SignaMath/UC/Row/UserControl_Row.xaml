@@ -9,7 +9,7 @@
     <Grid>
         <Grid.ContextMenu>
             <ContextMenu>
-                <MenuItem Header="Supprimer la ligne" Click="MenuItem_DeleteRow_Click"/>
+                <MenuItem x:Name="MenuItem_delete" Header="Supprimer la ligne" Click="MenuItem_DeleteRow_Click"/>
             </ContextMenu>
         </Grid.ContextMenu>
         
