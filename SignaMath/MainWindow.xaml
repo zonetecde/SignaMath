@@ -115,6 +115,7 @@
             <Button Width="200" x:Name="button_Save" Content="Enregistrer" Background="White" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
             <Button Width="200" x:Name="button_Copy" Content="Copier" Background="White" FontSize="16" ButtonBase.Click="button_Copy_Click" Margin="5,0,0,0" />
             <Button Width="200" x:Name="button_Reset" Content="Réinitialiser" Background="White" FontSize="16" ButtonBase.Click="Button_ResetBoard_Click" Margin="5,0,0,0" />
+            <Button Width="200" x:Name="button_Refresh" Content="Actualliser" Background="White" FontSize="16" Margin="5,0,0,0" Click="button_RefreshBoard_Click" />
         </StackPanel>
 
         <Grid Grid.RowSpan="2" x:Name="Grid_Help" Background="#CC000000" Visibility="Hidden">

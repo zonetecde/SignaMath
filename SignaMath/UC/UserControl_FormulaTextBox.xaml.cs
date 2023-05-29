@@ -1,5 +1,7 @@
 ﻿using AngouriMath.Extensions;
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +15,7 @@ namespace SignaMath
     /// </summary>
     public partial class UserControl_FormulaTextBox : UserControl
     {
-        internal Action<string>? FormulaChanged = null; // Action appelée lorsque la formule est modifiée
+        internal Action<string,bool>? FormulaChanged = null; // Action appelée lorsque la formule est modifiée
         internal bool DirectWriting = false; // Indique si ce qui est saisi par l'utilisateur est déjà en format LaTex
         internal bool AllowEmpty = false; // Indique si une formule vide est autorisée
 
@@ -77,9 +79,18 @@ namespace SignaMath
                 {
                     textBox_clear.Background = Brushes.Transparent; // Définit le fond de la zone de texte non formatée comme transparent
                     formulaControl_formatted.Formula = latexExp; // Définit la formule formatée
+
+                    // si c'est un nbre à virgule infini alors n'affiche que les premiers digits
+                    Regex regex = new Regex(@"^\d+\.\d+$");
+                    if (regex.IsMatch(latexExp))                    
+                    {
+                        if(latexExp.Length > 5)
+                            formulaControl_formatted.Formula = latexExp.Substring(0, 5) + "...";
+                    }
+
                     if (FormulaChanged != null)
                     {
-                        FormulaChanged(textBox_clear.Text); // Appelle l'action de notification de changement de formule
+                        FormulaChanged(textBox_clear.Text, true); // Appelle l'action de notification de changement de formule
                     }
                 }
                 else

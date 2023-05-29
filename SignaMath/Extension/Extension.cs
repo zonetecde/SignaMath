@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AngouriMath;
+using AngouriMath.Extensions;
+using SignaMath.Classes;
+using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using static AngouriMath.Entity;
 
 namespace SignaMath.Extension
 {
@@ -74,6 +78,16 @@ namespace SignaMath.Extension
         }
 
         /// <summary>
+        /// Remplace les valeurs remarquables dans une expression
+        /// </summary>
+        /// <param name="newFormula">L'expression mathématiques</param>
+        internal static string ReplaceValeurRemarquable(string newFormula)
+        {
+            return newFormula.Replace("e", "(" + Math.Exp(1).ToString(CultureInfo.InvariantCulture) + ")");
+        }
+
+
+        /// <summary>
         /// Converti une expression mathématique en son résultat
         /// </summary>
         /// <param name="expBrute">Expression mathématique brute</param>
@@ -81,6 +95,7 @@ namespace SignaMath.Extension
         /// <returns>Résultat de la conversion</returns>
         internal static double StrToDouble(string expBrute, bool isAlone = false)
         {
+            expBrute = ReplaceValeurRemarquable(expBrute).Replace(",", ".");
             double approximation;
             try
             {
@@ -92,7 +107,11 @@ namespace SignaMath.Extension
                 else
                 {
                     // Conversion directe en utilisant le séparateur de décimales approprié
-                    approximation = double.Parse(expBrute.Replace(",", "."), CultureInfo.InvariantCulture);
+                    Entity replacedExpr = expBrute;
+                    var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
+                    double app = double.Parse(result, CultureInfo.InvariantCulture);
+
+                    approximation = app;
                 }
             }
             catch

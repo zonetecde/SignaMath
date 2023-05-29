@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Documents;
 
 namespace SignaMath.Classes
 {
@@ -60,8 +62,10 @@ namespace SignaMath.Classes
         internal static void UpdateColumn()
         {
             MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => {
-                x.FormulaChanged(x.TextBox_Expression.textBox_clear.Text);
+                x.FormulaChanged(x.TextBox_Expression.textBox_clear.Text, false);
             });
+
+            UpdateBoard();
         }
     }
 }

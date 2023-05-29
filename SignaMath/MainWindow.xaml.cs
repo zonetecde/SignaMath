@@ -24,7 +24,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.6";
+        private const string VERSION = "1.0.7";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -60,7 +60,7 @@ namespace SignaMath
             formulaTextBox_f.FormulaChanged += ChangeFonctionName;
             formulaTextBox_content.FormulaChanged += NewFunctionWrited;
             // Change le côté droit de l'équation
-            formulaBox_y.FormulaChanged += (newY) =>
+            formulaBox_y.FormulaChanged += (newY, c) =>
             {
                 var d = Extension.Extension.StrToDouble(newY);
                 
@@ -74,7 +74,7 @@ namespace SignaMath
         /// Change en conséquence le nom de la fonction et de la variable
         /// </summary>
         /// <param name="newFuncName"></param>
-        private void ChangeFonctionName(string newFuncName)
+        private void ChangeFonctionName(string newFuncName, bool callUpdateBoard = true)
         {
             newFuncName = newFuncName.Trim();
             if(!newFuncName.EndsWith("="))
@@ -113,7 +113,7 @@ namespace SignaMath
         /// dresse donc son tableau de signe
         /// </summary>
         /// <param name="newFunction">La nouvelle fonction</param>
-        private void NewFunctionWrited(string newFunction)
+        private void NewFunctionWrited(string newFunction, bool callUpdateBoard = true)
         {
             var rows = Sheller.ShellFunction(newFunction);
 
@@ -471,10 +471,17 @@ namespace SignaMath
         {
             TableauDeSigne.StackPanel_Row.Children.RemoveRange(1, TableauDeSigne.StackPanel_Row.Children.Count - 1);
             GlobalVariable.TableColumns.Clear();
+
             button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
             button_AjoutLigneConcluante.Content = "Ajouter la ligne concluante";
             button_AjoutTableauVariation.IsEnabled = false;
             button_AjoutLigneConcluante.IsEnabled = false;
+            var headerRow = (MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
+                                                        .First(x => x.RowType == RowType.HEADER));
+
+            GlobalVariable.TableColumns.Clear();
+            headerRow.UC_borneMin.textBox_clear.Text = @"-\infty";
+            headerRow.UC_borneMax.textBox_clear.Text = @"+\infty";
 
             if (e != null)
             {
@@ -483,6 +490,14 @@ namespace SignaMath
             }
 
             GlobalVariable.UpdateBoard();
+        }
+
+        /// <summary>
+        /// Actualise le tableau
+        /// </summary>
+        private void button_RefreshBoard_Click(object sender, RoutedEventArgs e)
+        {
+            GlobalVariable.UpdateColumn();
         }
     }
 }
