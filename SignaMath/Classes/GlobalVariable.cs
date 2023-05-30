@@ -34,8 +34,9 @@ namespace SignaMath.Classes
         internal static double IntervalleMin { get; set; } = double.MinValue;
         internal static double IntervalleMax { get; set; } = double.MaxValue;
 
-        // Liste des signes dans l'ordre de la row concluante
-        internal static List<char> RowConcluanteSigns { get; set; } = new();
+        // Formule qui va être utilisé pour le tableau de variation
+        internal static string? TableauDeVariationFormule { get; set; } = null;
+
 
         /// <summary>
         /// Met à jour l'entiereté du tableau de signe en plaçant les
@@ -50,7 +51,6 @@ namespace SignaMath.Classes
             // On reset le signe de toutes les colonnes (car elles vont être recalculer)
             TableColumns.ForEach(x => x.ColumnSign = '+');
             LastColumnSign= '+';
-            RowConcluanteSigns = new();
 
             // Met à jour toutes les rows du tableau de signe
             MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x => x.UpdateRow());

@@ -92,10 +92,19 @@
                                 </Grid>
                             </StackPanel>
 
-                            <DockPanel  Grid.Column="1"  >
-                                <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_f" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,0,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
-                                <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
+                            <DockPanel Grid.Column="1">
+                                <DockPanel DockPanel.Dock="Left">
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_f" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,0,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
+                                </DockPanel>
+                                <StackPanel Orientation="Vertical" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0,0,0">
+                                    <Button Content="Simplifier" Background="White" Margin="5,0,0,0" Width="70" Click="Button_Simplify_Click" Height="15" Padding="1,-2,1,0"/>
+                                    <Button Content="Dériver" Background="White" Margin="5,0,0,0" Width="70" Click="Button_Derive_Click" Height="15" Padding="1,-2,1,0" />
+                                    <Button Content="Primitiver" Background="White" Margin="5,0,0,0" Width="70"  Click="Button_Primitive_Click" Height="15" Padding="1,-2,1,0"/>
+                                    <Button Content="Factoriser" Background="White" Margin="5,0,0,0" Width="70"  Click="Button_Factorize_Click" Height="15" Padding="1,-2,1,0"/>
+                                </StackPanel>
                             </DockPanel>
+
                         </Grid>
 
                     </Grid>
@@ -111,11 +120,11 @@
         </Viewbox>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,5"  HorizontalAlignment="Center" VerticalAlignment="Bottom" >
-            <Button Width="200" x:Name="button_Help" Content="Aide" Background="White" FontSize="16" ButtonBase.Click="button_Help_Click" Margin="0,0,5,0" />
-            <Button Width="200" x:Name="button_Save" Content="Enregistrer" Background="White" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
-            <Button Width="200" x:Name="button_Copy" Content="Copier" Background="White" FontSize="16" ButtonBase.Click="button_Copy_Click" Margin="5,0,0,0" />
-            <Button Width="200" x:Name="button_Reset" Content="Réinitialiser" Background="White" FontSize="16" ButtonBase.Click="Button_ResetBoard_Click" Margin="5,0,0,0" />
-            <Button Width="200" x:Name="button_Refresh" Content="Actualliser" Background="White" FontSize="16" Margin="5,0,0,0" Click="button_RefreshBoard_Click" />
+            <Button Width="125" x:Name="button_Help" Content="Aide" Background="White" FontSize="16" ButtonBase.Click="button_Help_Click" Margin="0,0,5,0" />
+            <Button Width="165" x:Name="button_Save" Content="Enregistrer" Background="White" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
+            <Button Width="165" x:Name="button_Copy" Content="Copier" Background="White" FontSize="16" ButtonBase.Click="button_Copy_Click" Margin="5,0,0,0" />
+            <Button Width="165" x:Name="button_Refresh" Content="Actualiser" Background="White" FontSize="16" Margin="5,0,0,0" Click="button_RefreshBoard_Click" />
+            <Button Width="125" x:Name="button_Reset" Content="Réinitialiser" Background="White" FontSize="16" ButtonBase.Click="Button_ResetBoard_Click" Margin="5,0,0,0" />
         </StackPanel>
 
         <Grid Grid.RowSpan="2" x:Name="Grid_Help" Background="#CC000000" Visibility="Hidden">
@@ -148,11 +157,10 @@
                         <Run Text="Il se peut que les signes ne soient pas corrects (ce n'est cependant encore jamais arrivé). Vous pouvez cependant corriger les signes erronés en faisant un clique gauche dessus, afin de mettre la valeur attendue. Veillez à toujours séparer le numérateur du dénominateur dans 2 lignes différentes, et à sélectionner le bon type de ligne (normal/ligne de valeur interdite)."/>
                             </TextBlock>
 
-                            <Label Content="Pourquoi aucune valeur n'est affichée dans le tableau de variation" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <Label Content="Comment modifier la formule du tableau de variation ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
                             <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
-                            <Run Text="Il faut donc calculer vous-même et insérer le résultat en faisant un clique gauche à l'extrémité de la flèche souhaitée."/>
+                            <Run Text="Vous devez faire un clic droit sur le tableau de variation, puis sur 'Saisir une formule'."/>
                             </TextBlock>
-
 
                             <Label Content="---------" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
 

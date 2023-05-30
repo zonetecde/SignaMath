@@ -1,4 +1,6 @@
-﻿using ClassLibrary;
+﻿using AngouriMath;
+using AngouriMath.Extensions;
+using ClassLibrary;
 using HonkSharp.Fluency;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
@@ -14,6 +16,7 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Windows;
+using static AngouriMath.Entity;
 
 namespace SignaMath
 {
@@ -24,7 +27,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.7";
+        private const string VERSION = "1.0.8";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -244,10 +247,12 @@ namespace SignaMath
                     Button_AjoutLigneConcluante_Click(this, null);
                 }
 
-                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
+                UserControl_Row uc = new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
                 {
                     Height = HeightTableauDeVariationSlider.Value,
-                });
+                };
+
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(uc);
 
                 button_AjoutTableauVariation.Content = "Supprimer le tableau de variation";
             }
@@ -498,6 +503,74 @@ namespace SignaMath
         private void button_RefreshBoard_Click(object sender, RoutedEventArgs e)
         {
             GlobalVariable.UpdateColumn();
+        }
+
+        /// <summary>
+        /// Simplifie l'expression dans la formulaBox de fonction
+        /// </summary>
+        private void Button_Simplify_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity result = expr.Simplify();
+                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+            }
+            catch
+            {
+                // Simplification impossible
+            }
+        }
+
+        /// <summary>
+        /// Dérive l'expression dans la formulaBox de fonction
+        /// </summary>
+        private void Button_Derive_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity result = expr.Differentiate(Char.ToString(GlobalVariable.VariableName)).Simplify();
+                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+            }
+            catch
+            {
+                // Dérivation impossible
+            }
+        }        
+        
+        /// <summary>
+        /// Primitive l'expression dans la formulaBox de fonction
+        /// </summary>
+        private void Button_Primitive_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity result = expr.Integrate(Char.ToString(GlobalVariable.VariableName)).Simplify();
+                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+            }
+            catch
+            {
+                // Primitive impossible
+            }
+        }        
+        
+        /// <summary>
+        /// Factorise l'expression dans la formulaBox de fonction
+        /// </summary>
+        private void Button_Factorize_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity result = expr.Factorize();
+                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+            }
+            catch
+            {
+                // Factorisation impossible
+            }
         }
     }
 }

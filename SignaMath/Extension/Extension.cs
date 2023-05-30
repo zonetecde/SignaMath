@@ -99,20 +99,8 @@ namespace SignaMath.Extension
             double approximation;
             try
             {
-                if (expBrute.Contains('/'))
-                {
-                    // Fraction non encore convertie
-                    approximation = ParseDoubleFromString(expBrute);
-                }
-                else
-                {
-                    // Conversion directe en utilisant le séparateur de décimales approprié
-                    Entity replacedExpr = expBrute;
-                    var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
-                    double app = double.Parse(result, CultureInfo.InvariantCulture);
-
-                    approximation = app;
-                }
+                // Fraction non encore convertie
+                approximation = ParseDoubleFromString(expBrute);           
             }
             catch
             {
@@ -133,50 +121,18 @@ namespace SignaMath.Extension
         }
 
         // Méthode privée pour extraire un nombre réel d'une chaîne de caractères
-        private static double ParseDoubleFromString(string num)
+        private static double ParseDoubleFromString(string expression)
         {
-            // Supprime les espaces multiples entre les caractères, les virgules et les espaces en début et fin de chaîne
-            num = Regex.Replace(num.Replace(",", ""), @"\s+", " ").Trim();
-            double d = 0;
-            int whole = 0;
-            double numerator;
-            double denominator;
+            Entity result = MathS.FromString(expression).EvalNumerical();
 
-            // Y a-t-il une fraction ?
-            if (num.Contains("/"))
+            if (result is Number realNumber)
             {
-                // Y a-t-il un espace ?
-                if (num.Contains(" "))
-                {
-                    // Sépare l'entier et la fraction
-                    int firstspace = num.IndexOf(" ");
-                    string fraction = num.Substring(firstspace, num.Length - firstspace);
-                    // Définit l'entier
-                    whole = int.Parse(num.Substring(0, firstspace));
-                    // Définit le numérateur et le dénominateur
-                    numerator = double.Parse(fraction.Split("/".ToCharArray())[0]);
-                    denominator = double.Parse(fraction.Split("/".ToCharArray())[1]);
-                }
-                else
-                {
-                    // Définit le numérateur et le dénominateur
-                    numerator = double.Parse(num.Split("/".ToCharArray())[0]);
-                    denominator = double.Parse(num.Split("/".ToCharArray())[1]);
-                }
-
-                // Est-ce une fraction valide ?
-                if (denominator != 0)
-                {
-                    d = whole + numerator / denominator;
-                }
+                return (double)realNumber;
             }
             else
             {
-                // Conversion directe de la chaîne en nombre réel en supprimant les espaces
-                d = double.Parse(num.Replace(" ", ""));
+                throw new Exception();
             }
-
-            return d;
         }
     }
 }

@@ -4,11 +4,13 @@ using SignaMath.Classes;
 using SignaMath.UC;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using static AngouriMath.Entity;
 
 namespace SignaMath
 {
@@ -17,7 +19,6 @@ namespace SignaMath
     /// </summary>
     public partial class UserControl_Row : UserControl
     {
-        internal List<string> RightSideElement = new List<string>();
         internal UserControl_FormulaTextBox UC_borneMin;
         internal UserControl_FormulaTextBox UC_borneMax;
         public RowType RowType { get; }
@@ -53,6 +54,20 @@ namespace SignaMath
                 {
                     TextBox_Expression.formulaControl_formatted.Formula = "f(" + GlobalVariable.VariableName + ")";
                     TextBox_Expression.textBox_clear.Text = "f(" + GlobalVariable.VariableName + ")";
+
+                    MenuItem_tableauDeVariation.IsEnabled = true;
+                    if (GlobalVariable.TableauDeVariationFormule == null)
+                    {
+                        Loaded += (s, e) =>
+                        {
+                            // demande de saisir une formule pour le tableau de variation
+                            MenuItem_TableauDeVariation_Click(this, null);
+                        };
+                    }
+                    else
+                    {
+                        this.ToolTip = GlobalVariable.TableauDeVariationFormule;
+                    }
                 }
             }
 
@@ -81,14 +96,27 @@ namespace SignaMath
                 UC_borneMin.Margin = new Thickness(20, 0, 0, 0);
                 UC_borneMin.textBox_clear.Text = "-\\infty";
                 UC_borneMin.DirectWriting = true;
-                UC_borneMin.FormulaChanged += (newIntervalMin,c) => { GlobalVariable.IntervalleMin = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin); GlobalVariable.UpdateColumn(); };
+                UC_borneMin.FormulaChanged += (newIntervalMin,c) => 
+                {
+                    double writedInterval = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin);
+                    if (GlobalVariable.IntervalleMax >= writedInterval) 
+                        GlobalVariable.IntervalleMin = writedInterval; 
+                    else throw new Exception(); // intervalle min plus grand que intervalle max
+                    GlobalVariable.UpdateColumn(); 
+                };
 
                 UC_borneMax = new();
                 UC_borneMax.HorizontalAlignment = HorizontalAlignment.Right;
                 UC_borneMax.Margin = new Thickness(0, 0, 20, 0);
                 UC_borneMax.textBox_clear.Text = "+\\infty";
                 UC_borneMax.DirectWriting = true;
-                UC_borneMax.FormulaChanged += (newIntervalMax,c) => { GlobalVariable.IntervalleMax = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax); GlobalVariable.UpdateColumn(); };
+                UC_borneMax.FormulaChanged += (newIntervalMax,c) => { 
+                    double writedInterval = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax);
+                    if (GlobalVariable.IntervalleMin <= writedInterval)
+                        GlobalVariable.IntervalleMax = writedInterval;
+                    else throw new Exception(); // intervalle max plus petit que intervalle min
+                    GlobalVariable.UpdateColumn(); 
+                };
 
                 Grid_RowContainer.Children.Add(UC_borneMin);
                 Grid_RowContainer.Children.Add(UC_borneMax);
@@ -121,7 +149,6 @@ namespace SignaMath
                         // Va donner une indications visuelle à l'utilisateur que 
                         // le nom de la variable écrite n'est pas correct.
                         throw new Exception();
-
 
                     char oldLetter = GlobalVariable.VariableName;
                     GlobalVariable.VariableName = Convert.ToChar(newFormula);
@@ -301,12 +328,40 @@ namespace SignaMath
                     userControl_CellSign.FormulaTextBoxRight.VerticalAlignment = isPlus ? VerticalAlignment.Top : VerticalAlignment.Bottom;
                     userControl_CellSign.FormulaTextBoxRight.Margin = isPlus ? new Thickness(0, 0, -20, 0) : new Thickness(0, 10.5, -25, 5);
 
+                    // Écris la valeur si une fonction est entrée
+                    try
+                    {
+                        if (i != tableColumns.Count)
+                        {
+                            if (!tableColumns[i].ValeurInterdite && !String.IsNullOrEmpty(GlobalVariable.TableauDeVariationFormule)) // !valeur interdite
+                            {
+                                userControl_CellSign.FormulaTextBoxRight.textBox_clear.Text = ReplaceVariableAndCalculate(GlobalVariable.TableauDeVariationFormule, tableColumns[i].Expression);
+                            }
+                        }
+                        else
+                        {
+                            if (GlobalVariable.IntervalleMax != double.MaxValue && !String.IsNullOrEmpty(GlobalVariable.TableauDeVariationFormule)) // !infini 
+                            {
+                                userControl_CellSign.FormulaTextBoxRight.textBox_clear.Text = ReplaceVariableAndCalculate(GlobalVariable.TableauDeVariationFormule, GlobalVariable.IntervalleMax.ToString(CultureInfo.InvariantCulture));
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // erreur 
+                    }
+
                     // Ajoute la valeur à gauche de la flèche de la première cellule
                     if (i == 0)
                     {
                         userControl_CellSign.FormulaTextBoxLeft.Visibility = Visibility.Visible;
                         userControl_CellSign.FormulaTextBoxLeft.VerticalAlignment = isPlus ? VerticalAlignment.Bottom : VerticalAlignment.Top;
                         userControl_CellSign.FormulaTextBoxLeft.Margin = isPlus ? new Thickness(0, 10.5, -20, 5) : new Thickness(0, 0, -20, 0);
+
+                        if (GlobalVariable.IntervalleMin != double.MinValue && !String.IsNullOrEmpty(GlobalVariable.TableauDeVariationFormule)) // !infini 
+                        {
+                            userControl_CellSign.FormulaTextBoxLeft.textBox_clear.Text = ReplaceVariableAndCalculate(GlobalVariable.TableauDeVariationFormule, GlobalVariable.IntervalleMin.ToString(CultureInfo.InvariantCulture));
+                        }
                     }
 
                     // Si ce n'est pas la dernière colonne
@@ -345,7 +400,6 @@ namespace SignaMath
                         string pattern = @"sqrt\((.*?)\)";
                         MatchCollection matches = Regex.Matches(TextBox_Expression.textBox_clear.Text, pattern);
 
-                        // regarde si il y a du x dans la racine
                         if (matches.Count > 0)
                         {
                             List<string> solutions = new();
@@ -355,31 +409,44 @@ namespace SignaMath
                                 string value = match.Groups[1].Value;
 
                                 // regarde s'il y a du x dans la racine
+                                // Sinon la racine est constante
                                 if (value.Contains(GlobalVariable.VariableName))
                                 {
                                     // dans ce cas calcul l'équation de 'value = 0' pour savoir quand
                                     // commence la fonction, car racine carré ne prend pas de nombre négatif
                                     solutions.AddRange( GetAllEquationSolution(value + " = 0"));
+                                }
+                                else
+                                {
+                                    // Vérifie que le nombre dans la racine est positif
+                                    Entity expression = value.ToEntity();
+                                    Entity result = expression.EvalNumerical();
+
+                                    if (Extension.Extension.StrToDouble(result.EvalNumerical().Stringize()) < 0)
+                                        throw new Exception();
                                     
                                 }
                             }
 
                             // prend la solution la plus grande
-                            var max_solution = solutions.Max(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()));
-                            var solution = solutions.First(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()) == max_solution);
-
-                            double approximation = Extension.Extension.StrToDouble(solution.EvalNumerical().Stringize());
-
-                            // change l'intervalle min
-                            if (GlobalVariable.IntervalleMin < approximation && !IsLooping)
+                            if (solutions.Any())
                             {
-                                IsLooping = true;
-                                var headerRow = (MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
-                                    .First(x => x.RowType == RowType.HEADER));
-                                headerRow.UC_borneMin.formulaControl_formatted.Formula = approximation.ToString();
-                                GlobalVariable.IntervalleMin = approximation;
-                                tableColumns.RemoveAll(x => x.Value <= GlobalVariable.IntervalleMin || x.Value >= GlobalVariable.IntervalleMax);
-                                IsLooping = false;
+                                var max_solution = solutions.Max(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()));
+                                var solution = solutions.First(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()) == max_solution);
+
+                                double approximation = Extension.Extension.StrToDouble(solution.EvalNumerical().Stringize());
+
+                                // change l'intervalle min
+                                if (GlobalVariable.IntervalleMin < approximation && !IsLooping)
+                                {
+                                    IsLooping = true;
+                                    var headerRow = (MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
+                                        .First(x => x.RowType == RowType.HEADER));
+                                    headerRow.UC_borneMin.formulaControl_formatted.Formula = approximation.ToString();
+                                    GlobalVariable.IntervalleMin = approximation;
+                                    tableColumns.RemoveAll(x => x.Value <= GlobalVariable.IntervalleMin || x.Value >= GlobalVariable.IntervalleMax);
+                                    IsLooping = false;
+                                }
                             }
                         }
                     }
@@ -404,6 +471,20 @@ namespace SignaMath
                             // StrToDouble va renvoyer soit 1 soit -1 en fonction du signe final de l'expression
                             double approximation = Extension.Extension.StrToDouble(expBrute, true);
                             userControl_CellSign.Label_Sign.Content = approximation >= 0 ? '+' : '-';
+
+                            // Dans ce cas on change le signe de toutes les colonnes existantes
+                            // Car elles seront tous affecté par le même signe
+                            foreach(var colonne in GlobalVariable.TableColumns)
+                            {
+                                colonne.ColumnSign = RegleDesSignes(colonne.ColumnSign, approximation >= 0 ? '+' : '-');
+                            }
+
+                            // Si il n'y a aucune colonne, alors on change le signe de la dernière colonne
+                            // car c'est la dernière colonne
+                            if(!GlobalVariable.TableColumns.Any())
+                            {
+                                GlobalVariable.LastColumnSign = RegleDesSignes(GlobalVariable.LastColumnSign, approximation >= 0 ? '+' : '-');
+                            }
                         }
 
                         continue;
@@ -444,19 +525,8 @@ namespace SignaMath
 
                         // Met à jour le signe de la colonne entière pour la ligne concluante
                         // en usant de la règle des signes
-                        char columnSign = tableColumns[i].ColumnSign;
+                        tableColumns[i].ColumnSign = RegleDesSignes(tableColumns[i].ColumnSign, cellSign);
 
-                        switch (columnSign)
-                        {
-                            case '+':
-                                if (cellSign == '-') // + et - = -
-                                    tableColumns[i].ColumnSign = '-';
-                                break;
-                            case '-':
-                                if (cellSign == '-') // - et - = +
-                                    tableColumns[i].ColumnSign = '+';
-                                break;
-                        }
                     }
                     // Si c'est la dernière colonne (= après on a la borne max)
                     else
@@ -469,22 +539,48 @@ namespace SignaMath
                         char cellSign = GetSign(formule, variable);
                         userControl_CellSign.Label_Sign.Content = cellSign;
 
-                        // Règle des signes pour la dernière colonne
-                        switch (GlobalVariable.LastColumnSign)
-                        {
-                            case '+':
-                                if (cellSign == '-')
-                                    GlobalVariable.LastColumnSign = '-';
-                                break;
-                            case '-':
-                                if (cellSign == '-')
-                                    GlobalVariable.LastColumnSign = '+';
-                                break;
-                        }
+                        GlobalVariable.LastColumnSign = RegleDesSignes(GlobalVariable.LastColumnSign, cellSign);
                     }
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Remplace dans la formule donnée la variable par le nombre donné est calcul le résultat
+        /// </summary>
+        /// <param name="expression">L'expression avec x</param>
+        /// <param name="expression">Le nombre qui va remplacer la variable</param>
+        /// <returns>L'expression calculée</returns>
+        private string ReplaceVariableAndCalculate(string expression, string x)
+        {
+            Entity expr = expression.ToEntity();
+            Entity replacedExpr = expr.Substitute(Char.ToString(GlobalVariable.VariableName), x.ToEntity());
+            Number result = replacedExpr.Simplify().EvalNumerical();
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// Effectue la règle des signes
+        /// </summary>
+        /// <param name="premier">Le premier signe</param>
+        /// <param name="second">Le second string</param>
+        /// <returns>Le signe résultant</returns>
+        private static char RegleDesSignes(char premier, char second)
+        {
+            switch (premier)
+            {
+                case '+':
+                    if (second == '-') // + et - = -
+                        return '-';
+                    break;
+                case '-':
+                    if (second == '-') // - et - = +
+                        return '+';
+                    break;
+            }
+
+            return premier;
         }
 
         /// <summary>
@@ -562,6 +658,43 @@ namespace SignaMath
                 MainWindow._MainWindow.UC_TableauDeSigne.StackPanel_Row.Children.Remove(this);
 
                 GlobalVariable.UpdateBoard();
+            }
+        }        
+        
+        /// <summary>
+        /// Demande de saisir la formule du tableau de variation
+        /// </summary>
+        private void MenuItem_TableauDeVariation_Click(object sender, RoutedEventArgs? e)
+        {
+            var result = Microsoft.VisualBasic.Interaction.InputBox("Entrez la formule pour calculer les valeurs du tableau de variation \n\nUtilisez la même variable que celle dans le tableau de signe, par défaut `x`", "Formule", "");
+            
+            if(!String.IsNullOrEmpty(result))
+            {
+                if(result.Contains(GlobalVariable.VariableName))
+                {
+                    // teste la formule
+                    try
+                    {
+                        ReplaceVariableAndCalculate(result, "0");
+
+                        // test passé sans erreur
+                        GlobalVariable.TableauDeVariationFormule = result;
+                        this.ToolTip = GlobalVariable.TableauDeVariationFormule;
+                        this.UpdateRow();
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Échec : vérifiez la formule.", "Échec");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Échec : aucune variable entrée.");
+                }
+            }
+            else
+            {
+                GlobalVariable.TableauDeVariationFormule = string.Empty;
             }
         }
 
