@@ -16,7 +16,7 @@ Liste des fonctionnalités principales :
 
 - Dresser un tableau de signe à partir d'une fonction entrée, en repérant les quotients, les produits et les lignes de valeur interdite
 - Dresser un tableau de signe en entrant nous-même les expressions de la colonne de gauche
-- Calculer automatiquement les colonnes et le signe des expressions
+- Résoudre automatiquement les équations des expressions, les placer dans le tableau et trouver leurs signes
 - Afficher une ligne type 'f(x)' résumant les variations finales de la fonction
 - Afficher le tableau de variation et calculer automatiquement ses valeurs
 - Changer le côté droit de l'équation (pour avoir le signe par exemple d'une fonction autre que par rapport à la droite Y=0)
