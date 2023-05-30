@@ -1,6 +1,7 @@
 # SignaMath
 
 SignaMath est un logiciel qui permet de créer facilement des tableaux de signes et de variations !
+
 Exemple de tableau dressé et sauvegardé à l'aide du logiciel :
 
 ![image](https://github.com/zonetecde/SignaMath/assets/56195432/14ef56d7-58f3-4e19-8b53-f9fc6536e598)
