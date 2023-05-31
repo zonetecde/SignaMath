@@ -81,10 +81,10 @@ namespace SignaMath
                     formulaControl_formatted.Formula = latexExp; // Définit la formule formatée
 
                     // si c'est un nbre à virgule infini alors n'affiche que les premiers digits
-                    Regex regex = new Regex(@"^\d+\.\d+$");
-                    if (regex.IsMatch(latexExp))                    
+                    Regex regex = new Regex(@"^-?\d+\.\d+$");
+                    if (regex.IsMatch(latexExp))
                     {
-                        if(latexExp.Length > 5)
+                        if (latexExp.Length > 5)
                             formulaControl_formatted.Formula = latexExp.Substring(0, 5) + "...";
                     }
 

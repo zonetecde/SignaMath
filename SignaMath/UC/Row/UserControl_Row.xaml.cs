@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -636,14 +637,27 @@ namespace SignaMath
 
                 // Remplace la VariableName par la variable
                 Entity replacedExpr = expr.Substitute(Char.ToString(GlobalVariable.VariableName), variable);
-                var result = replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty);
-                double app = Extension.Extension.StrToDouble(result);
-                sign = app >= GlobalVariable.Y ? '+' : '-'; ;
+
+                // Exécute l'expression de manière asynchrone avec une limite de temps
+                var task = Task.Run(() => replacedExpr.EvalNumerical().Stringize().Replace("{ ", string.Empty).Replace(" }", string.Empty));
+
+                if (task.Wait(TimeSpan.FromSeconds(1)))
+                {
+                    // Si l'exécution est terminée dans les 2 secondes, récupère le résultat
+                    var result = task.Result;
+                    double app = Extension.Extension.StrToDouble(result);
+                    sign = app >= GlobalVariable.Y ? '+' : '-';
+                }
+                else
+                {
+                    sign = 'Ø';
+                }
             }
             catch
             {
                 //TextBox_Expression.formulaControl_formatted_MouseLeftButtonUp(this,null);
             }
+
 
             return sign;
         }

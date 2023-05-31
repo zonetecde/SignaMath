@@ -36,14 +36,20 @@
                             <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
                         </ScrollViewer.Resources>
                         <Grid>
-                            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="50px"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
                                 <DockPanel>
                                     <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_f" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,0,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
                                     <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
                                 </DockPanel>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Left" Margin="325,0,0,0">
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Left">
                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <Button Content="Factoriser" Background="White" Margin="5,0,0,2.5" Width="70"  Click="Button_Factorize_Click" Height="22.5" />
                                     <Button Content="Simplifier" Background="White" Margin="5,2.5,0,0" Width="70" Click="Button_Simplify_Click" Height="22.5" />
@@ -56,7 +62,7 @@
                             </StackPanel>
 
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" >
                                 <Label Content="Comparer le signe par rapport à Y = " FontSize="14" VerticalAlignment="Center"/>
                                 <local2:UserControl_FormulaTextBox Grid.Column="1" x:Name="formulaBox_y"  VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" MinHeight="40" Margin="0,0,10,0"/>
                             </StackPanel>
