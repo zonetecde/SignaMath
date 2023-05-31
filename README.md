@@ -4,11 +4,11 @@ SignaMath est un logiciel qui permet de créer facilement des tableaux de signes
 
 Exemple de tableau dressé et sauvegardé à l'aide du logiciel :
 
-![image](https://github.com/zonetecde/SignaMath/assets/56195432/a68efd2f-a258-4032-a566-fab8af5ea9f7)
+![image](https://github.com/zonetecde/SignaMath/assets/56195432/5fdb1cee-1cac-4e37-8518-81de6b78386d)
 
 Interface du logiciel :
 
-![image](https://github.com/zonetecde/SignaMath/assets/56195432/db7283cb-4351-4e0d-904b-1b27cb669c62)
+![image](https://github.com/zonetecde/SignaMath/assets/56195432/0beaeb32-064e-41be-98d3-b155b058e6c8)
 
 Le logiciel offre une prise en main facile grâce à son interface intuitive.
 
