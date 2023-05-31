@@ -4,6 +4,8 @@
              xmlns:local="clr-namespace:SignaMath"
              StartupUri="MainWindow.xaml"  DispatcherUnhandledException="Application_DispatcherUnhandledException">
     <Application.Resources>
-         
+        <FontFamily x:Key="jakarta_light" >/fonts/#Plus Jakarta Sans ExtraLight</FontFamily>
+        <FontFamily x:Key="jakarta_regular" >/fonts/#Plus Jakarta Sans</FontFamily>
+        <FontFamily x:Key="jakarta_bold" >/fonts/#Plus Jakarta Sans Medium</FontFamily>
     </Application.Resources>
 </Application>

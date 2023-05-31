@@ -261,6 +261,13 @@ namespace SignaMath
                         uc.Loaded += (sender, e) =>
                         {
                             uc.Margin = new Thickness(0, 0, (uc.ActualWidth / 2) * -1, 0);
+
+                            // Regarde si le nombre de la colonne est trop grand pour la taille de la colonne
+                            // Si oui, alors redimensionne la ligne
+                            if(uc.formulaControl_formatted.ActualHeight > this.ActualHeight - 20)
+                            {
+                                this.Height = uc.formulaControl_formatted.ActualHeight + 15;
+                            }
                         };
 
                         // Ajoute le texte à la colonne

@@ -7,7 +7,13 @@
         xmlns:local="clr-namespace:SignaMath.UC"
         xmlns:local2="clr-namespace:SignaMath"
         mc:Ignorable="d"
-        Title="SignaMath"  MinHeight="450" MinWidth="800" d:Width="1200" Icon="assets/icon.png" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen">
+        Title="SignaMath"  FontFamily="{StaticResource jakarta_regular}" MinHeight="450" MinWidth="800" d:Width="800" Icon="assets/icon.png" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen">
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FFFAFFF9" Offset="0.143"/>
+            <GradientStop Color="White" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -20,98 +26,123 @@
         <Image x:Name="img_arrowTemplateBottom" Source="assets/arrow_bottom.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed"/>
         <!-- -->
 
-        <Border  Grid.Row="0" Margin="20,20,20,0">
-            <StackPanel>
-                <ScrollViewer  FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Padding="0,0,0,-5" Margin="0,0,0,5">
-                    <ScrollViewer.Resources>
-                        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
-                    </ScrollViewer.Resources>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="auto"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                                <StackPanel Height="30" Orientation="Horizontal">
-                                    <TextBlock Text="Longueur du tableau : " FontSize="17"/>
-                                    <Slider x:Name="WidthSlider" Minimum="500" Maximum="3000" Value="1000" Width="200" Margin="0,3.5,0,0"/>
-                                    <TextBlock Text="Hauteur de la première ligne : " Margin="30,0,0,0" FontSize="17"/>
-                                    <Slider x:Name="HeightHeaderSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,3.5,0,0" />
-                                </StackPanel>
-                                <StackPanel Height="30" Orientation="Horizontal">
-                                    <TextBlock Text="Hauteur des autres lignes : " Margin="0,0,0,0" FontSize="17"/>
-                                    <Slider x:Name="HeightRowSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,3.5,0,0" />
-                                    <TextBlock Text="Hauteur du tableau de variation : " Margin="30,0,0,0" FontSize="17"/>
-                                    <Slider x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="200" Width="200" Margin="0,3.5,0,0" />
-                                </StackPanel>
+        <Border  Grid.Row="0" Margin="20,10,20,0">
+            <TabControl FocusVisualStyle="{x:Null}" Height="100" BorderBrush="#7F000000" Background="Transparent" BorderThickness="0.5,0.5,0.5,0.5"  >
 
-                            </StackPanel>
+                <TabItem  BorderBrush="#0C000000"  Header="Formule" Width="150" Background="#00000000">
 
-                            <Grid Grid.Column="1" FocusVisualStyle="{x:Null}" VerticalAlignment="Top"  HorizontalAlignment="Right" MinHeight="40" >
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <Label Content="Comparer le signe par rapport à Y = " FontSize="14" VerticalAlignment="Center"/>
-                                <local2:UserControl_FormulaTextBox Grid.Column="1" x:Name="formulaBox_y"  VerticalAlignment="Top" HorizontalAlignment="Right" FontSize="14" MinHeight="40"/>
-                            </Grid>
-
-                    </Grid>
-
-                </ScrollViewer>
-
-                <ScrollViewer FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
-                    <ScrollViewer.Resources>
-                        <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
-                    </ScrollViewer.Resources>
-                    <Grid>
+                    <ScrollViewer FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
+                        <ScrollViewer.Resources>
+                            <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
+                        </ScrollViewer.Resources>
                         <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-
-                            <StackPanel  Grid.Column="0">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button Grid.Column="0" Content="Ajouter une ligne" Background="White" Click="Button_AddRow_Click" FontSize="16" Margin="0,0,5,0"/>
-                                    <Button Grid.Column="1" Content="Ajouter une ligne de valeur interdite" Background="White" Click="Button_AddForbiddenValueRow_Click" FontSize="16" Margin="5,0,0,0"/>
-                                </Grid>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1*"/>
-                                        <ColumnDefinition Width="1*"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Button x:Name="button_AjoutLigneConcluante" Content="Ajouter la ligne concluante" Background="White" Click="Button_AjoutLigneConcluante_Click" Margin="0,5,5,0" FontSize="16" IsEnabled="False" />
-                                    <Button Grid.Column="1" x:Name="button_AjoutTableauVariation" Content="Ajouter le tableau de variation" Background="White" Click="Button_AjoutTableauVariation_Click" Margin="5,5,0,0" FontSize="16" IsEnabled="False" ToolTip="Si la fonction écrite est une dérivée, affiche son tableau de variation" />
-                                </Grid>
-                            </StackPanel>
-
-                            <DockPanel Grid.Column="1">
-                                <DockPanel DockPanel.Dock="Left">
+                            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Left">
+                                <DockPanel>
                                     <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_f" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,0,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
                                     <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
                                 </DockPanel>
-                                <StackPanel Orientation="Vertical" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0,0,0">
-                                    <Button Content="Simplifier" Background="White" Margin="5,0,0,0" Width="70" Click="Button_Simplify_Click" Height="15" Padding="1,-2,1,0"/>
-                                    <Button Content="Dériver" Background="White" Margin="5,0,0,0" Width="70" Click="Button_Derive_Click" Height="15" Padding="1,-2,1,0" />
-                                    <Button Content="Primitiver" Background="White" Margin="5,0,0,0" Width="70"  Click="Button_Primitive_Click" Height="15" Padding="1,-2,1,0"/>
-                                    <Button Content="Factoriser" Background="White" Margin="5,0,0,0" Width="70"  Click="Button_Factorize_Click" Height="15" Padding="1,-2,1,0"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Left" Margin="325,0,0,0">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Button Content="Factoriser" Background="White" Margin="5,0,0,2.5" Width="70"  Click="Button_Factorize_Click" Height="22.5" />
+                                    <Button Content="Simplifier" Background="White" Margin="5,2.5,0,0" Width="70" Click="Button_Simplify_Click" Height="22.5" />
                                 </StackPanel>
-                            </DockPanel>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <Button Content="Dériver" Background="White" Margin="5,0,0,2.5" Width="70" Click="Button_Derive_Click" Height="22.5"/>
+                                    <Button Content="Primitiver" Background="White" Margin="5,2.5,0,0" Width="70"  Click="Button_Primitive_Click" Height="22.5" />
+                                </StackPanel>
+
+                            </StackPanel>
+
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" >
+                                <Label Content="Comparer le signe par rapport à Y = " FontSize="14" VerticalAlignment="Center"/>
+                                <local2:UserControl_FormulaTextBox Grid.Column="1" x:Name="formulaBox_y"  VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" MinHeight="40" Margin="0,0,10,0"/>
+                            </StackPanel>
 
                         </Grid>
+                    </ScrollViewer>
 
-                    </Grid>
+                </TabItem>
 
-                </ScrollViewer>
+                <TabItem BorderBrush="#0C000000"  Header="Customisation" Width="150" Background="#00000000" >
 
-            </StackPanel>
+                    <StackPanel Margin="0,5,0,0">
+                        <ScrollViewer FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto">
+                            <ScrollViewer.Resources>
+                                <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
+                            </ScrollViewer.Resources>
+                            <Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+
+                                    <StackPanel  Grid.Column="0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button Grid.Column="0" Content="Ajouter une ligne" Background="White" Click="Button_AddRow_Click" FontSize="16" Margin="0,0,5,0"/>
+                                            <Button Grid.Column="1" Content="Ajouter une ligne de valeur interdite" Background="White" Click="Button_AddForbiddenValueRow_Click" FontSize="16" Margin="5,0,0,0"/>
+                                        </Grid>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*"/>
+                                                <ColumnDefinition Width="1*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Button x:Name="button_AjoutLigneConcluante" Content="Ajouter la ligne concluante" Background="White" Click="Button_AjoutLigneConcluante_Click" Margin="0,5,5,0" FontSize="16" IsEnabled="False" />
+                                            <Button Grid.Column="1" x:Name="button_AjoutTableauVariation" Content="Ajouter le tableau de variation" Background="White" Click="Button_AjoutTableauVariation_Click" Margin="5,5,0,0" FontSize="16" IsEnabled="False" ToolTip="Si la fonction écrite est une dérivée, affiche son tableau de variation" />
+                                        </Grid>
+                                    </StackPanel>
+
+
+                                </Grid>
+
+                            </Grid>
+
+                        </ScrollViewer>
+
+                    </StackPanel>
+                </TabItem>
+
+
+                <TabItem BorderBrush="#0C000000"  Header="Taille" Width="150"  Background="#00000000">
+                    
+                    <ScrollViewer FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto" Margin="0,-15,0,0">
+                        <ScrollViewer.Resources>
+                            <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
+                        </ScrollViewer.Resources>
+                        <Grid MinHeight="100">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" MinWidth="240"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="1*"  MinWidth="255"/>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="0.5*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*"/>
+                                <RowDefinition Height="1*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="Longueur du tableau : " FontSize="17" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,5"/>
+                            <Slider Grid.Column="1" x:Name="WidthSlider" Minimum="500" Maximum="3000" Value="1000" Width="200" Margin="0,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left"/>
+                            <TextBlock Grid.Row="1" Text="Hauteur de la première ligne : " Margin="0,5,0,0" FontSize="17" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                            <Slider Grid.Row="1" Grid.Column="1" x:Name="HeightHeaderSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="5,9,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Column="2" Text="Hauteur des autres lignes : " Margin="0,0,0,5" FontSize="17" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                            <Slider Grid.Column="3" x:Name="HeightRowSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="Hauteur du tableau de variation : " FontSize="17" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                            <Slider Grid.Row="1" Grid.Column="3" x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="200" Width="200" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,9.5,0,0" />
+
+                        </Grid>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
 
         </Border>
 
@@ -121,10 +152,10 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,5"  HorizontalAlignment="Center" VerticalAlignment="Bottom" >
             <Button Width="125" x:Name="button_Help" Content="Aide" Background="White" FontSize="16" ButtonBase.Click="button_Help_Click" Margin="0,0,5,0" />
-            <Button Width="165" x:Name="button_Save" Content="Enregistrer" Background="White" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
-            <Button Width="165" x:Name="button_Copy" Content="Copier" Background="White" FontSize="16" ButtonBase.Click="button_Copy_Click" Margin="5,0,0,0" />
-            <Button Width="165" x:Name="button_Refresh" Content="Actualiser" Background="White" FontSize="16" Margin="5,0,0,0" Click="button_RefreshBoard_Click" />
-            <Button Width="125" x:Name="button_Reset" Content="Réinitialiser" Background="White" FontSize="16" ButtonBase.Click="Button_ResetBoard_Click" Margin="5,0,0,0" />
+            <Button Width="165" x:Name="button_Save" Content="Enregistrer"  Background="#FFFFFFFF" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
+            <Button Width="165" x:Name="button_Copy" Content="Copier"  Background="#FFFFFFFF" FontSize="16" ButtonBase.Click="button_Copy_Click" Margin="5,0,0,0" />
+            <Button Width="165" x:Name="button_Refresh" Content="Actualiser"  Background="#FFFFFFFF" FontSize="16" Margin="5,0,0,0" Click="button_RefreshBoard_Click" />
+            <Button Width="125" x:Name="button_Reset" Content="Réinitialiser"  Background="#FFFFFFFF" FontSize="16" ButtonBase.Click="Button_ResetBoard_Click" Margin="5,0,0,0" />
         </StackPanel>
 
         <Grid Grid.RowSpan="2" x:Name="Grid_Help" Background="#CC000000" Visibility="Hidden">
@@ -132,42 +163,34 @@
                 <Grid>
 
                     <ScrollViewer>
-                        <StackPanel>
-                            <Label Content="Aide pour l'utilisation" FontSize="20" HorizontalAlignment="Center" Padding="5,0,5,5" FontFamily="Calibri" FontWeight="Bold"/>
-                            <Label Content="Comment écrire des racines carrées ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                        <StackPanel Margin="0,0,12.5,0">
+                            <Label Content="Aide pour l'utilisation" FontSize="20" HorizontalAlignment="Center" Padding="5,0,5,5"  FontWeight="Bold"/>
+                            <Label Content="Comment écrire des racines carrées ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                         <Run Text="Pour insérer une racine carrée dans une expression, il faut écrire"/>
                         <Run Text="sqrt(x)" FontWeight="Bold"/>
                         <Run Text="en remplaçant x par le nombre souhaité, ou par une variable."/>
                             </TextBlock>
 
-                            <Label Content="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Label Content="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                             <Run Text="Pour écrire une puissance de deux par exemple, il faut taper "/><Run Text="^2" FontWeight="Bold"/><Run Text="."/>
                             </TextBlock>
 
-                            <Label Content="Comment changer le nom de la variable x ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Label Content="Comment changer le nom de la variable x ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                         <Run Text="Pour changer le nom de la variable x il faut appuyer dans la cellule en haut à gauche du tableau."/>
                             </TextBlock>
 
-                            <Label Content="Il y a une erreur de signe" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
+                            <Label Content="Il y a une erreur de signe" FontSize="20" Margin="0,10,0,0" />
 
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
-                        <Run Text="Il se peut que les signes ne soient pas corrects (ce n'est cependant encore jamais arrivé). Vous pouvez cependant corriger les signes erronés en faisant un clique gauche dessus, afin de mettre la valeur attendue. Veillez à toujours séparer le numérateur du dénominateur dans 2 lignes différentes, et à sélectionner le bon type de ligne (normal/ligne de valeur interdite)."/>
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
+                        <Run Text="Il se peut que les signes ne soient pas corrects (ce n'est cependant encore jamais arrivé). Vous pouvez corriger les signes erronés en faisant un clique gauche dessus, afin de mettre la valeur attendue. Veillez à toujours séparer le numérateur du dénominateur dans 2 lignes différentes, et à sélectionner le bon type de ligne (normal/ligne de valeur interdite)."/>
                             </TextBlock>
 
-                            <Label Content="Comment modifier la formule du tableau de variation ?" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
+                            <Label Content="Comment modifier la formule du tableau de variation ?"  FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
                             <Run Text="Vous devez faire un clic droit sur le tableau de variation, puis sur 'Saisir une formule'."/>
-                            </TextBlock>
-
-                            <Label Content="---------" FontSize="20" Margin="0,10,0,0" FontFamily="Calibri"/>
-
-                            <TextBlock TextWrapping="Wrap" FontSize="16" FontFamily="Calibri">
-                            <Run Text="Ce logiciel est distribué sous licence CC BY-NC."/><LineBreak/>
-                            <Run Text="STASZEWSKI Rayane - 2023 - www.github.com/zonetecde"/><LineBreak/><LineBreak/>
-                            <Run Text="Version "/><Run x:Name="Run_Version" Text="Version 1.0.0"/>
                             </TextBlock>
                         </StackPanel>
 
@@ -201,6 +224,35 @@
                     </StackPanel>
 
                     <Button Content="X" Background="#FFFFE1E1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,10,10,0" FontFamily="Consolas" Padding="1,0,1,0" FontSize="16" Click="Button_CloseUpdate_Click"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Image Source="assets/info.png" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Margin="0,2.5,2.5,0" Cursor="Hand" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+        <Grid Grid.RowSpan="2" x:Name="Grid_Information" Background="#CC000000" Visibility="Hidden">
+            <Border Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="550" Height="300" BorderBrush="Black" BorderThickness="3,3,3,3" CornerRadius="20,20,20,20">
+                <Grid>
+
+                    <StackPanel Margin="10,0,10,0">
+                        <TextBlock Text="SignaMath" FontSize="30" HorizontalAlignment="Center" Margin="0,15,0,0"/>
+                        <TextBlock FontSize="17" HorizontalAlignment="Center">
+                            <Run Text="Version " FontSize="16"/><Run x:Name="Run_Version"  Text="1.0.0"/>
+                        </TextBlock>
+
+                        <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="/assets/icon.png" VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Margin="0,15,0,0" />
+
+                        <TextBlock TextWrapping="Wrap" FontSize="16" Margin="0,30,0,0" TextAlignment="Center">
+                            <Run Text="Logiciel développé par Rayane Staszewski"/><LineBreak/>
+                            <Hyperlink NavigateUri="https://www.github.com/zonetecde/SignaMath" RequestNavigate="Hyperlink_RequestNavigate">Site internet</Hyperlink><Run Text=" | "/><Hyperlink NavigateUri="https://www.buymeacoffee.com/zonetecde" RequestNavigate="Hyperlink_RequestNavigate">M'acheter un café</Hyperlink>
+                        </TextBlock>
+
+                        <TextBlock Margin="5,12.5,0,0">
+                                                        <Run Text="Ce logiciel est distribué sous licence CC BY-NC."/><LineBreak/>
+                        </TextBlock>
+
+
+                    </StackPanel>
+                    <Button Content="X" Background="#FFFFE1E1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,10,10,0" FontFamily="Consolas" Padding="1,0,1,0" FontSize="16" ButtonBase.Click="Button_CloseHelp_Click"/>
                 </Grid>
             </Border>
         </Grid>

@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Navigation;
 using static AngouriMath.Entity;
 
 namespace SignaMath
@@ -27,7 +28,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.0.8";
+        private const string VERSION = "1.0.9";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -333,6 +334,7 @@ namespace SignaMath
         private void Button_CloseHelp_Click(object sender, RoutedEventArgs e)
         {
             Grid_Help.Visibility = Visibility.Collapsed;
+            Grid_Information.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -571,6 +573,27 @@ namespace SignaMath
             {
                 // Factorisation impossible
             }
+        }
+
+        /// <summary>
+        /// Affiche la page d'information
+        /// </summary>
+        private void Image_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Grid_Information.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Lien hypertext cliqué
+        /// </summary>
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            var ps = new ProcessStartInfo(e.Uri.AbsoluteUri)
+            {
+                UseShellExecute = true,
+                Verb = "open"
+            };
+            Process.Start(ps);
         }
     }
 }
