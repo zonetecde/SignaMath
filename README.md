@@ -27,4 +27,6 @@ Liste des fonctionnalités principales :
 - Dériver, simplifier, factoriser et primitiver la fonction du tableau
 - Et autres
 
+[Téléchargement direct] (https://github.com/zonetecde/SignaMath/releases/latest/download/SignaMath.exe)
+
 Ce logiciel est distribué sous licence [CC BY-NC](https://creativecommons.org/licenses/by-nc/4.0/legalcode.fr). Veuillez consulter le fichier LICENSE pour plus de détails.
