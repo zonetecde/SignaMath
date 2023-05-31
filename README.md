@@ -8,7 +8,7 @@ Exemple de tableau dressé et sauvegardé à l'aide du logiciel :
 
 Interface du logiciel :
 
-![image](https://github.com/zonetecde/SignaMath/assets/56195432/4ae4bdc3-7552-495e-b2f0-7a17e54fe517)
+![image](https://github.com/zonetecde/SignaMath/assets/56195432/db7283cb-4351-4e0d-904b-1b27cb669c62)
 
 Le logiciel offre une prise en main facile grâce à son interface intuitive.
 
