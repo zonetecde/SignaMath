@@ -10,7 +10,6 @@
         <Grid.ContextMenu>
             <ContextMenu>
                 <MenuItem x:Name="MenuItem_delete" Header="Supprimer la ligne" Click="MenuItem_DeleteRow_Click"/>
-                <MenuItem x:Name="MenuItem_tableauDeVariation" Header="Saisir une formule" IsEnabled="False" Click="MenuItem_TableauDeVariation_Click"/>
             </ContextMenu>
         </Grid.ContextMenu>
         

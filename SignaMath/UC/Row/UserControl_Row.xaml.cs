@@ -48,27 +48,13 @@ namespace SignaMath
                 TextBox_Expression.DirectWriting = true;
                 if (rowType == RowType.CONCLUANTE)
                 {
-                    TextBox_Expression.formulaControl_formatted.Formula = "f'(" + GlobalVariable.VariableName + ")";
-                    TextBox_Expression.textBox_clear.Text = "f'(" + GlobalVariable.VariableName + ")";
+                    TextBox_Expression.formulaControl_formatted.Formula = GlobalVariable.FonctionName + "'(" + GlobalVariable.VariableName + ")";
+                    TextBox_Expression.textBox_clear.Text = GlobalVariable.FonctionName + "'(" + GlobalVariable.VariableName + ")";
                 }
                 else if (rowType == RowType.TABLEAU_DE_VARIATION)
                 {
-                    TextBox_Expression.formulaControl_formatted.Formula = "f(" + GlobalVariable.VariableName + ")";
-                    TextBox_Expression.textBox_clear.Text = "f(" + GlobalVariable.VariableName + ")";
-
-                    MenuItem_tableauDeVariation.IsEnabled = true;
-                    if (GlobalVariable.TableauDeVariationFormule == null)
-                    {
-                        Loaded += (s, e) =>
-                        {
-                            // demande de saisir une formule pour le tableau de variation
-                            MenuItem_TableauDeVariation_Click(this, null);
-                        };
-                    }
-                    else
-                    {
-                        this.ToolTip = GlobalVariable.TableauDeVariationFormule;
-                    }
+                    TextBox_Expression.formulaControl_formatted.Formula = GlobalVariable.FonctionName + "(" + GlobalVariable.VariableName + ")";
+                    TextBox_Expression.textBox_clear.Text = GlobalVariable.FonctionName + "(" + GlobalVariable.VariableName + ")";
                 }
             }
 
@@ -97,13 +83,13 @@ namespace SignaMath
                 UC_borneMin.Margin = new Thickness(20, 0, 0, 0);
                 UC_borneMin.textBox_clear.Text = "-\\infty";
                 UC_borneMin.DirectWriting = true;
-                UC_borneMin.FormulaChanged += (newIntervalMin,c) => 
+                UC_borneMin.FormulaChanged += (newIntervalMin, c) =>
                 {
                     double writedInterval = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin);
-                    if (GlobalVariable.IntervalleMax >= writedInterval) 
-                        GlobalVariable.IntervalleMin = writedInterval; 
+                    if (GlobalVariable.IntervalleMax >= writedInterval)
+                        GlobalVariable.IntervalleMin = writedInterval;
                     else throw new Exception(); // intervalle min plus grand que intervalle max
-                    GlobalVariable.UpdateColumn(); 
+                    GlobalVariable.UpdateColumn();
                 };
 
                 UC_borneMax = new();
@@ -111,12 +97,13 @@ namespace SignaMath
                 UC_borneMax.Margin = new Thickness(0, 0, 20, 0);
                 UC_borneMax.textBox_clear.Text = "+\\infty";
                 UC_borneMax.DirectWriting = true;
-                UC_borneMax.FormulaChanged += (newIntervalMax,c) => { 
+                UC_borneMax.FormulaChanged += (newIntervalMax, c) =>
+                {
                     double writedInterval = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax);
                     if (GlobalVariable.IntervalleMin <= writedInterval)
                         GlobalVariable.IntervalleMax = writedInterval;
                     else throw new Exception(); // intervalle max plus petit que intervalle min
-                    GlobalVariable.UpdateColumn(); 
+                    GlobalVariable.UpdateColumn();
                 };
 
                 Grid_RowContainer.Children.Add(UC_borneMin);
@@ -211,13 +198,13 @@ namespace SignaMath
                             GlobalVariable.TableColumns.Add(columnElement);
                         }
                     }
-                           
+
 
                     break;
             }
 
             // Met à jour l'entiereté du tableau
-            if(callUpdateBoard)
+            if (callUpdateBoard)
                 GlobalVariable.UpdateBoard();
         }
 
@@ -265,7 +252,7 @@ namespace SignaMath
 
                             // Regarde si le nombre de la colonne est trop grand pour la taille de la colonne
                             // Si oui, alors redimensionne la ligne
-                            if(uc.formulaControl_formatted.ActualHeight > this.ActualHeight - 20)
+                            if (uc.formulaControl_formatted.ActualHeight > this.ActualHeight - 20)
                             {
                                 this.Height = uc.formulaControl_formatted.ActualHeight + 15;
                             }
@@ -422,7 +409,7 @@ namespace SignaMath
                                 {
                                     // dans ce cas calcul l'équation de 'value = 0' pour savoir quand
                                     // commence la fonction, car racine carré ne prend pas de nombre négatif
-                                    solutions.AddRange( GetAllEquationSolution(value + " = 0"));
+                                    solutions.AddRange(GetAllEquationSolution(value + " = 0"));
                                 }
                                 else
                                 {
@@ -432,7 +419,7 @@ namespace SignaMath
 
                                     if (Extension.Extension.StrToDouble(result.EvalNumerical().Stringize()) < 0)
                                         throw new Exception();
-                                    
+
                                 }
                             }
 
@@ -467,7 +454,8 @@ namespace SignaMath
                         {
                             // Dans ce cas on remplace x par n'importe quel nombre; elle sera toujours du même signe
                             string formule = TextBox_Expression.textBox_clear.Text;
-                            char cellSign = GetSign(formule, GlobalVariable.IntervalleMin);
+                            // on calcule ici la moité des 2 bornes pour choisir un nombre dans l'intervalle
+                            char cellSign = GetSign(formule, (GlobalVariable.IntervalleMin + GlobalVariable.IntervalleMax)/2);
                             userControl_CellSign.Label_Sign.Content = cellSign;
                         }
 
@@ -482,14 +470,14 @@ namespace SignaMath
 
                             // Dans ce cas on change le signe de toutes les colonnes existantes
                             // Car elles seront tous affecté par le même signe
-                            foreach(var colonne in GlobalVariable.TableColumns)
+                            foreach (var colonne in GlobalVariable.TableColumns)
                             {
                                 colonne.ColumnSign = RegleDesSignes(colonne.ColumnSign, approximation >= 0 ? '+' : '-');
                             }
 
                             // Si il n'y a aucune colonne, alors on change le signe de la dernière colonne
                             // car c'est la dernière colonne
-                            if(!GlobalVariable.TableColumns.Any())
+                            if (!GlobalVariable.TableColumns.Any())
                             {
                                 GlobalVariable.LastColumnSign = RegleDesSignes(GlobalVariable.LastColumnSign, approximation >= 0 ? '+' : '-');
                             }
@@ -679,43 +667,6 @@ namespace SignaMath
                 MainWindow._MainWindow.UC_TableauDeSigne.StackPanel_Row.Children.Remove(this);
 
                 GlobalVariable.UpdateBoard();
-            }
-        }        
-        
-        /// <summary>
-        /// Demande de saisir la formule du tableau de variation
-        /// </summary>
-        private void MenuItem_TableauDeVariation_Click(object sender, RoutedEventArgs? e)
-        {
-            var result = Microsoft.VisualBasic.Interaction.InputBox("Entrez la formule pour calculer les valeurs du tableau de variation \n\nUtilisez la même variable que celle dans le tableau de signe, par défaut `x`", "Formule", "");
-            
-            if(!String.IsNullOrEmpty(result))
-            {
-                if(result.Contains(GlobalVariable.VariableName))
-                {
-                    // teste la formule
-                    try
-                    {
-                        ReplaceVariableAndCalculate(result, "0");
-
-                        // test passé sans erreur
-                        GlobalVariable.TableauDeVariationFormule = result;
-                        this.ToolTip = GlobalVariable.TableauDeVariationFormule;
-                        this.UpdateRow();
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Échec : vérifiez la formule.", "Échec");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Échec : aucune variable entrée.");
-                }
-            }
-            else
-            {
-                GlobalVariable.TableauDeVariationFormule = string.Empty;
             }
         }
 

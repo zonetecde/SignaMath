@@ -20,7 +20,11 @@ namespace SignaMath.Classes
 
         // Défini le nom de la variable dans l'équation. Elle peut être qu'un 
         // caractère non-numérique.
-        internal static char VariableName { get; set; } = 'x';
+        internal static char VariableName { get; set; } = 'x';        
+        
+        // Défini la lettre de la fonction
+        // caractère non-numérique.
+        internal static char FonctionName { get; set; } = 'f';
 
         // Contient toutes les colonnes-solutions du tableau de signe
         internal static List<ColumnElement> TableColumns { get; set; } = new List<ColumnElement>();

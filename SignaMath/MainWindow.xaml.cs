@@ -28,7 +28,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.0";
+        private const string VERSION = "1.1.1";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -61,8 +61,11 @@ namespace SignaMath
             // Set la formula textbox
             InitFormulaBox();
 
-            formulaTextBox_f.FormulaChanged += ChangeFonctionName;
+            formulaTextBox_fName.FormulaChanged += ChangeFonctionName;
             formulaTextBox_content.FormulaChanged += NewFunctionWrited;
+            formulaTextBox_tabDeVariation.FormulaChanged += FonctionTabDeVarChanged;
+
+
             // Change le côté droit de l'équation
             formulaBox_y.FormulaChanged += (newY, c) =>
             {
@@ -74,42 +77,87 @@ namespace SignaMath
         }
 
         /// <summary>
+        /// Une fonction pour calculer les valeurs du tableau de variation a été entrée
+        /// </summary>
+        /// <param name="function">La nouvelle fonction</param>
+        /// <param name="callUpdateBoard"></param>
+        private void FonctionTabDeVarChanged(string function, bool callUpdateBoard = true)
+        {
+            if (function.Contains(GlobalVariable.VariableName))
+            {
+                GlobalVariable.TableauDeVariationFormule = function;
+                if(!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
+                {
+                    ((UserControl_Row)TableauDeSigne.StackPanel_Row.Children[TableauDeSigne.StackPanel_Row.Children.Count - 1])
+                        .UpdateRow();
+                }
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+
+        /// <summary>
         /// Un nouveau nom de fonction a été donné
         /// Change en conséquence le nom de la fonction et de la variable
         /// </summary>
         /// <param name="newFuncName"></param>
         private void ChangeFonctionName(string newFuncName, bool callUpdateBoard = true)
         {
-            newFuncName = newFuncName.Trim();
-            if(!newFuncName.EndsWith("="))
+            if (!String.IsNullOrEmpty(newFuncName))
             {
-                formulaTextBox_f.formulaControl_formatted.Formula += "=";
-            }
-
-            if(!String.IsNullOrEmpty(newFuncName))
-            {
-                // change la variable
-                string newVariable = Regex.Match(newFuncName, @"\(([^)]*)\)").Groups[1].Value;
-                if (newVariable.Length == 1)
+                // Vérifie le format de la chaine
+                newFuncName = newFuncName.Trim();
+                if (newFuncName.Contains("="))
                 {
-                    // change la lettre de la fonction
-                    UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
-                    {
-                        if (x.RowType == RowType.HEADER)
-                            x.TextBox_Expression.textBox_clear.Text = newVariable;
-                    });
+                    // enlève l'égal et tout ce qui va après
+                    newFuncName = newFuncName.Substring(0, newFuncName.IndexOf('=')).Trim();
                 }
 
-                if (!char.IsDigit(newFuncName[0]))
+                formulaTextBox_fName.formulaControl_formatted.Formula = newFuncName + " =";
+
+                // vérifie que le string est au format a(b)
+                string pattern = @"^[A-Za-z]\([A-Za-z]\)$";
+
+                if (Regex.IsMatch(newFuncName, pattern))
                 {
-                    // change la lettre de la fonction
-                    UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+                    // change la variable
+                    string newVariable = Regex.Match(newFuncName, @"\(([^)]*)\)").Groups[1].Value;
+                    if (newVariable.Length == 1)
                     {
-                        if (x.RowType == RowType.CONCLUANTE)
-                            x.TextBox_Expression.textBox_clear.Text = newFuncName[0].ToString() + "'(" + newVariable + ")";
-                    });
+                        if (newVariable != "e") // e est une variable réservé à l'expo
+                        {
+                            // change la lettre de la fonction
+                            UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+                            {
+                                if (x.RowType == RowType.HEADER)
+                                    x.TextBox_Expression.textBox_clear.Text = newVariable;
+                            });
+                        }
+                        else
+                            throw new Exception();
+                    }
+
+                    if (!char.IsDigit(newFuncName[0]))
+                    {
+                        // change la lettre de la fonction
+                        GlobalVariable.FonctionName = newFuncName[0];
+
+                        UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().ForEach(x =>
+                        {
+                            if (x.RowType == RowType.CONCLUANTE)
+                                x.TextBox_Expression.textBox_clear.Text = newFuncName[0].ToString() + "'(" + newVariable + ")";
+                            if (x.RowType == RowType.TABLEAU_DE_VARIATION)
+                                x.TextBox_Expression.textBox_clear.Text = newFuncName[0].ToString() + "(" + newVariable + ")";
+                        });
+                    }
+
+                    return;
                 }
-            }
+
+            }          
+            throw new Exception();        
         }
 
         /// <summary>
@@ -141,7 +189,15 @@ namespace SignaMath
                 }
             }
 
-            Button_AjoutLigneConcluante_Click(this, null);
+            // si une formule du tab de variation est entrée on affiche directe le tab de variation
+            if (String.IsNullOrEmpty(GlobalVariable.TableauDeVariationFormule))
+            {
+                Button_AjoutLigneConcluante_Click(this, null);
+            }
+            else
+            {
+                Button_AjoutTableauVariation_Click(this, null);
+            }
 
             GlobalVariable.AllowFocusWhenAdded = true;
         }
@@ -269,16 +325,21 @@ namespace SignaMath
         /// </summary>
         private void InitFormulaBox()
         {
-            formulaTextBox_content.textBox_clear.Visibility = Visibility.Hidden;
-            formulaTextBox_content.formulaControl_formatted.Formula = "ecrire\\:une\\:fonction";
-            formulaTextBox_content.AllowEmpty = true;
-            formulaTextBox_content.textBox_clear.MinWidth = formulaTextBox_content.formulaControl_formatted.MinWidth;
-            formulaTextBox_content.textBox_clear.HorizontalAlignment = HorizontalAlignment.Left;
-            formulaTextBox_content.formulaControl_formatted.HorizontalAlignment = HorizontalAlignment.Left;
+            Action<UserControl_FormulaTextBox, string> Init = (f, str) =>{
+                f.textBox_clear.Visibility = Visibility.Hidden;
+                f.formulaControl_formatted.Formula = str;
+                f.AllowEmpty = true;
+                f.textBox_clear.MinWidth = formulaTextBox_content.formulaControl_formatted.MinWidth;
+                f.textBox_clear.HorizontalAlignment = HorizontalAlignment.Left;
+                f.formulaControl_formatted.HorizontalAlignment = HorizontalAlignment.Left;
+                f.formulaControl_formatted.Visibility = Visibility.Visible;
+            };
 
-            formulaTextBox_content.formulaControl_formatted.Visibility = Visibility.Visible;
+            Init(formulaTextBox_content, "ecrire\\:une\\:fonction");
+            Init(formulaTextBox_tabDeVariation, "ecrire\\:une\\:formule");
 
-            formulaTextBox_f.formulaControl_formatted.Formula = "f(x) = ";
+            formulaTextBox_fName.formulaControl_formatted.Formula = "f(x) = ";
+            formulaTextBox_fName.DirectWriting = true;
 
             formulaBox_y.textBox_clear.Text = GlobalVariable.Y.ToString();
             formulaBox_y.textBox_clear.HorizontalContentAlignment = HorizontalAlignment.Left;
@@ -493,7 +554,10 @@ namespace SignaMath
             if (e != null)
             {
                 formulaTextBox_content.formulaControl_formatted.Formula = "ecrire\\:une\\:fonction";
+                formulaTextBox_tabDeVariation.formulaControl_formatted.Formula = "ecrire\\:une\\:formule";
+                formulaTextBox_fName.textBox_clear.Text = "f(x)";
                 formulaBox_y.textBox_clear.Text = "0";
+                GlobalVariable.VariableName = 'x';
             }
 
             GlobalVariable.UpdateBoard();
@@ -533,14 +597,27 @@ namespace SignaMath
             {
                 Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
                 Entity result = expr.Differentiate(Char.ToString(GlobalVariable.VariableName)).Simplify();
-                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+                SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
                 // Dérivation impossible
             }
-        }        
-        
+        }
+
+        /// <summary>
+        /// Affiche et set un texte à la formula textbox permettant de copier les résulats de la dérivation,
+        /// factorisation etc
+        /// </summary>
+        /// <param name="result"></param>
+        private void SetCopiedFormulaTextBox(string result)
+        {
+            textBox_copiedFormula.Text = result;
+            textBox_copiedFormula.Visibility = Visibility.Visible;
+            textBox_copiedFormula.Focus();
+            textBox_copiedFormula.SelectAll();
+        }
+
         /// <summary>
         /// Primitive l'expression dans la formulaBox de fonction
         /// </summary>
@@ -550,7 +627,7 @@ namespace SignaMath
             {
                 Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
                 Entity result = expr.Integrate(Char.ToString(GlobalVariable.VariableName)).Simplify();
-                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+                SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
@@ -567,7 +644,7 @@ namespace SignaMath
             {
                 Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
                 Entity result = expr.Factorize();
-                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+                SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
@@ -594,6 +671,25 @@ namespace SignaMath
                 Verb = "open"
             };
             Process.Start(ps);
+        }
+
+        /// <summary>
+        /// Stop trigger de la textbox pour copier une formule
+        /// </summary>
+        private void textBox_copiedFormula_LostFocus(object sender, RoutedEventArgs e)
+        {
+            textBox_copiedFormula.Visibility = Visibility.Hidden;
+        }
+
+        /// <summary>
+        /// Stop trigger de la textbox pour copier une formule
+        /// </summary>
+        private void textBox_copiedFormula_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Escape)
+            {
+                textBox_copiedFormula.Visibility = Visibility.Hidden;
+            }
         }
     }
 }

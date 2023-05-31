@@ -19,9 +19,18 @@ namespace SignaMath
         internal bool DirectWriting = false; // Indique si ce qui est saisi par l'utilisateur est déjà en format LaTex
         internal bool AllowEmpty = false; // Indique si une formule vide est autorisée
 
+        internal string previousFormula = string.Empty;
+        internal string previousText = string.Empty;
+
         public UserControl_FormulaTextBox()
         {
             InitializeComponent();
+
+            this.Loaded += (s, e) =>
+            {
+                previousFormula = formulaControl_formatted.Formula;
+                previousText = textBox_clear.Text;
+            };
         }
 
         /// <summary>
@@ -39,11 +48,11 @@ namespace SignaMath
         /// </summary>
         private void textBox_clear_LostFocus(object sender, RoutedEventArgs? e)
         {
-            if (textBox_clear.Background == Brushes.Transparent)
-            {
-                textBox_clear.Visibility = Visibility.Collapsed; // Masque la zone de texte non formatée
-                formulaControl_formatted.Visibility = Visibility.Visible; // Affiche la zone de texte formatée
-            }
+            // met la dernière valeur juste que l'utilisateur ai écrite
+            formulaControl_formatted.Formula = previousFormula;
+            textBox_clear.Text = previousText;
+            textBox_clear.Visibility = Visibility.Collapsed;
+            formulaControl_formatted.Visibility = Visibility.Visible;
         }
 
         /// <summary>
@@ -55,6 +64,14 @@ namespace SignaMath
             {
                 textBox_clear_LostFocus(this, null); // Appelle la méthode de perte de focus pour la zone de texte non formatée
             }
+            else if(e.Key == Key.Escape)
+            {
+                // valeur par défaut
+                formulaControl_formatted.Formula = previousFormula;
+                textBox_clear.Text = previousText;
+                textBox_clear.Visibility = Visibility.Collapsed; 
+                formulaControl_formatted.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
@@ -64,15 +81,29 @@ namespace SignaMath
         {
             try
             {
+                string newFormula = textBox_clear.Text.Replace(',', '.').Trim();
+
+                // si on a une exprresion du type x4, on remplace par x*4 car sinon c'est compté comme x^4.
+                string pattern = @"x(\d)";
+                string temp = newFormula;
+                newFormula = Regex.Replace(newFormula, pattern, "x*$1");
+                if (temp != newFormula)
+                {
+                    textBox_clear.Text = newFormula;
+                    textBox_clear.CaretIndex = textBox_clear.Text.Length;
+                    return;
+                }
+
                 string latexExp;
 
-                if (textBox_clear.Text.Replace(" ", string.Empty) == "-\\infty" || textBox_clear.Text.Replace(" ", string.Empty) == "+\\infty" || DirectWriting)
+                // si c'est des formules spéciales où du directwriting
+                if (textBox_clear.Text.Replace(" ", string.Empty) == "-\\infty" ||newFormula.Replace(" ", string.Empty) == "+\\infty" || DirectWriting)
                 {
-                    latexExp = textBox_clear.Text.Replace(',', '.'); // Remplace les virgules par des points dans la formule LaTex
+                    latexExp =newFormula;
                 }
                 else
                 {
-                    latexExp = textBox_clear.Text.Replace(',', '.').Latexise(); // Convertit la formule en format LaTex
+                    latexExp =newFormula.Latexise(); // Convertit la formule en format LaTex
                 }
 
                 if (IsValidFormula(latexExp))
@@ -82,6 +113,7 @@ namespace SignaMath
 
                     // si c'est un nbre à virgule infini alors n'affiche que les premiers digits
                     Regex regex = new Regex(@"^-?\d+\.\d+$");
+
                     if (regex.IsMatch(latexExp))
                     {
                         if (latexExp.Length > 5)
@@ -91,6 +123,10 @@ namespace SignaMath
                     if (FormulaChanged != null)
                     {
                         FormulaChanged(textBox_clear.Text, true); // Appelle l'action de notification de changement de formule
+
+                        // Si on est jusqu'ici c'est que tout est bon, la formule est valide
+                        previousText =newFormula;
+                        previousFormula = formulaControl_formatted.Formula;
                     }
                 }
                 else
@@ -119,6 +155,14 @@ namespace SignaMath
         {
             formulaControl_formatted.Formula = input; // Définit la formule formatée
             return formulaControl_formatted.Errors.Count == 0; // Renvoie vrai si la formule est valide, sinon faux
+        }
+
+        /// <summary>
+        /// Simule un clique pour trigger la formulaBox
+        /// </summary>
+        private void UserControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            formulaControl_formatted_MouseLeftButtonUp(this, null);
         }
     }
 }
