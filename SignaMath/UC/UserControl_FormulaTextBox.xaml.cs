@@ -19,6 +19,8 @@ namespace SignaMath
         internal bool DirectWriting = false; // Indique si ce qui est saisi par l'utilisateur est déjà en format LaTex
         internal bool AllowEmpty = false; // Indique si une formule vide est autorisée
 
+        internal string DefaultFormula = string.Empty; // La formule donnée lors de la création
+
         internal string previousFormula = string.Empty;
         internal string previousText = string.Empty;
 
@@ -29,6 +31,7 @@ namespace SignaMath
             this.Loaded += (s, e) =>
             {
                 previousFormula = formulaControl_formatted.Formula;
+                DefaultFormula = formulaControl_formatted.Formula;
                 previousText = textBox_clear.Text;
             };
         }
@@ -53,6 +56,11 @@ namespace SignaMath
             textBox_clear.Text = previousText;
             textBox_clear.Visibility = Visibility.Collapsed;
             formulaControl_formatted.Visibility = Visibility.Visible;
+
+            if(AllowEmpty && String.IsNullOrEmpty(textBox_clear.Text))
+            {
+                formulaControl_formatted.Formula = DefaultFormula;
+            }
         }
 
         /// <summary>
@@ -97,7 +105,7 @@ namespace SignaMath
                 string latexExp;
 
                 // si c'est des formules spéciales où du directwriting
-                if (textBox_clear.Text.Replace(" ", string.Empty) == "-\\infty" ||newFormula.Replace(" ", string.Empty) == "+\\infty" || DirectWriting)
+                if (textBox_clear.Text.Replace(" ", string.Empty) == "-\\infty" ||newFormula.Replace(" ", string.Empty) == "+\\infty" || DirectWriting || (AllowEmpty && string.IsNullOrEmpty(newFormula)))
                 {
                     latexExp =newFormula;
                 }

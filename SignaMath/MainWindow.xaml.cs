@@ -13,9 +13,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using static AngouriMath.Entity;
 
@@ -28,7 +34,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.1";
+        private const string VERSION = "1.1.2";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -65,7 +71,6 @@ namespace SignaMath
             formulaTextBox_content.FormulaChanged += NewFunctionWrited;
             formulaTextBox_tabDeVariation.FormulaChanged += FonctionTabDeVarChanged;
 
-
             // Change le côté droit de l'équation
             formulaBox_y.FormulaChanged += (newY, c) =>
             {
@@ -83,13 +88,24 @@ namespace SignaMath
         /// <param name="callUpdateBoard"></param>
         private void FonctionTabDeVarChanged(string function, bool callUpdateBoard = true)
         {
+            if (string.IsNullOrEmpty(function))
+            {
+                GlobalVariable.TableauDeVariationFormule = string.Empty;
+                return;
+            }
+
             if (function.Contains(GlobalVariable.VariableName))
             {
                 GlobalVariable.TableauDeVariationFormule = function;
+
                 if(!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
                 {
                     ((UserControl_Row)TableauDeSigne.StackPanel_Row.Children[TableauDeSigne.StackPanel_Row.Children.Count - 1])
                         .UpdateRow();
+                }
+                else
+                {
+                    Button_AjoutTableauVariation_Click(this, null);
                 }
             }
             else
@@ -167,6 +183,11 @@ namespace SignaMath
         /// <param name="newFunction">La nouvelle fonction</param>
         private void NewFunctionWrited(string newFunction, bool callUpdateBoard = true)
         {
+            if (string.IsNullOrEmpty(newFunction))
+            {
+                return;
+            }
+
             var rows = Sheller.ShellFunction(newFunction);
 
             GlobalVariable.AllowFocusWhenAdded = false;
@@ -325,18 +346,8 @@ namespace SignaMath
         /// </summary>
         private void InitFormulaBox()
         {
-            Action<UserControl_FormulaTextBox, string> Init = (f, str) =>{
-                f.textBox_clear.Visibility = Visibility.Hidden;
-                f.formulaControl_formatted.Formula = str;
-                f.AllowEmpty = true;
-                f.textBox_clear.MinWidth = formulaTextBox_content.formulaControl_formatted.MinWidth;
-                f.textBox_clear.HorizontalAlignment = HorizontalAlignment.Left;
-                f.formulaControl_formatted.HorizontalAlignment = HorizontalAlignment.Left;
-                f.formulaControl_formatted.Visibility = Visibility.Visible;
-            };
-
-            Init(formulaTextBox_content, "ecrire\\:une\\:fonction");
-            Init(formulaTextBox_tabDeVariation, "ecrire\\:une\\:formule");
+            InitSpecificFormulaBox(formulaTextBox_content, "ecrire\\:une\\:fonction");
+            InitSpecificFormulaBox(formulaTextBox_tabDeVariation, "ecrire\\:une\\:formule");
 
             formulaTextBox_fName.formulaControl_formatted.Formula = "f(x) = ";
             formulaTextBox_fName.DirectWriting = true;
@@ -344,6 +355,18 @@ namespace SignaMath
             formulaBox_y.textBox_clear.Text = GlobalVariable.Y.ToString();
             formulaBox_y.textBox_clear.HorizontalContentAlignment = HorizontalAlignment.Left;
             formulaBox_y.formulaControl_formatted.HorizontalContentAlignment = HorizontalAlignment.Left;
+        }
+
+        private void InitSpecificFormulaBox(UserControl_FormulaTextBox f, string str)
+        {
+            
+            f.textBox_clear.Visibility = Visibility.Hidden;
+            f.formulaControl_formatted.Formula = str;
+            f.AllowEmpty = true;
+            f.textBox_clear.MinWidth = formulaTextBox_content.formulaControl_formatted.MinWidth;
+            f.textBox_clear.HorizontalAlignment = HorizontalAlignment.Left;
+            f.formulaControl_formatted.HorizontalAlignment = HorizontalAlignment.Left;
+            f.formulaControl_formatted.Visibility = Visibility.Visible;
         }
 
 
@@ -626,8 +649,9 @@ namespace SignaMath
             try
             {
                 Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
-                Entity result = expr.Integrate(Char.ToString(GlobalVariable.VariableName)).Simplify();
-                SetCopiedFormulaTextBox(result.ToString());
+                Entity result = expr.Integrate(Char.ToString(GlobalVariable.VariableName));
+                if(result is not Integralf)
+                    SetCopiedFormulaTextBox(result.Simplify().ToString());
             }
             catch
             {
@@ -689,6 +713,52 @@ namespace SignaMath
             if(e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Escape)
             {
                 textBox_copiedFormula.Visibility = Visibility.Hidden;
+            }
+        }
+
+        /// <summary>
+        /// Affiche la page pour envoyer un commentaire
+        /// </summary>
+        private void Hyperlink_RequestNavigate_SendSuggestion(object sender, RequestNavigateEventArgs e)
+        {
+            Grid_SendSuggestion.Visibility = Grid_SendSuggestion.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        /// <summary>
+        /// M'envoie un commentaire
+        /// </summary>
+        private async void Button_SendComment_Click(object sender, RoutedEventArgs e)
+        {
+            if (String.IsNullOrEmpty(TextBox_nom.Text))
+            {
+                TextBox_nom.BorderBrush = Brushes.Red;
+                return;
+            }
+            else
+            {
+                TextBox_nom.ClearValue(TextBox.BorderBrushProperty);
+            }
+
+            string richText = new TextRange(richtextbox_commentaire.Document.ContentStart, richtextbox_commentaire.Document.ContentEnd).Text;
+            if (String.IsNullOrEmpty(richText) || richText == "\r\n")
+            {
+                richtextbox_commentaire.BorderBrush = Brushes.Red;
+                return;
+            }
+            else
+            {
+                richtextbox_commentaire.ClearValue(RichTextBox.BorderBrushProperty);
+            }
+
+            label_thanks.Visibility = Visibility.Visible;
+
+            var url = $"{BASE_URL}/api/Software/send-me-a-message?software=SignaMath&email=" + TextBox_nom.Text + "&message="+ richText;
+            using var httpClient = new HttpClient(new HttpClientHandler() { ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; } });
+            var response = await httpClient.PostAsync(url, new StringContent(""));
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                label_thanks.Content = "Désolé, un problème est survenu lors de l'envoi. Merci de l'envoyer manuellement à zonedetec@gmail.com !";
             }
         }
     }

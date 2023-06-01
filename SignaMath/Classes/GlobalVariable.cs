@@ -39,7 +39,7 @@ namespace SignaMath.Classes
         internal static double IntervalleMax { get; set; } = double.MaxValue;
 
         // Formule qui va être utilisé pour le tableau de variation
-        internal static string? TableauDeVariationFormule { get; set; } = null;
+        internal static string? TableauDeVariationFormule { get; set; } = string.Empty;
 
 
         /// <summary>

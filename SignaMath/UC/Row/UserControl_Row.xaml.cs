@@ -454,8 +454,15 @@ namespace SignaMath
                         {
                             // Dans ce cas on remplace x par n'importe quel nombre; elle sera toujours du même signe
                             string formule = TextBox_Expression.textBox_clear.Text;
-                            // on calcule ici la moité des 2 bornes pour choisir un nombre dans l'intervalle
-                            char cellSign = GetSign(formule, (GlobalVariable.IntervalleMin + GlobalVariable.IntervalleMax)/2);
+
+                            // on cherche par quoi on va remplacer x pour avec une efficacité maximale
+                            double variable = 0;
+                            if (GlobalVariable.IntervalleMin != double.MinValue)
+                                variable = GlobalVariable.IntervalleMin;
+                            else if (GlobalVariable.IntervalleMax != double.MaxValue)
+                                variable = GlobalVariable.IntervalleMax;
+
+                            char cellSign = GetSign(formule, variable);
                             userControl_CellSign.Label_Sign.Content = cellSign;
                         }
 

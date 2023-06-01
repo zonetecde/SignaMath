@@ -66,7 +66,7 @@
                             <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Left">
                                 <Grid>
                                     <Label Content="Formule à utiliser dans le tableau de variation :"/>
-                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_tabDeVariation" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="N'oubliez-pas d'utiliser la même variable que celle choisi, par défaut c'est 'x'"/>
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_tabDeVariation" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,7.5,0,0" HorizontalAlignment="Left" ToolTip="N'oubliez-pas d'utiliser la même variable que celle choisi, par défaut c'est 'x'"/>
                                 </Grid>
                             </StackPanel>
 
@@ -126,7 +126,7 @@
 
 
                 <TabItem BorderBrush="#0C000000"  Header="Taille" Width="150"  Background="#00000000">
-                    
+
                     <ScrollViewer FocusVisualStyle="{x:Null}" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto" Margin="0,-15,0,0">
                         <ScrollViewer.Resources>
                             <sys:Double x:Key="{x:Static SystemParameters.HorizontalScrollBarHeightKey}">5</sys:Double>
@@ -149,7 +149,7 @@
                             <TextBlock Grid.Row="1" Text="Hauteur de la première ligne : " Margin="0,5,0,0" FontSize="17" HorizontalAlignment="Right" VerticalAlignment="Top"/>
                             <Slider Grid.Row="1" Grid.Column="1" x:Name="HeightHeaderSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="5,9,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" />
                             <TextBlock Grid.Column="2" Text="Hauteur des autres lignes : " Margin="0,0,0,5" FontSize="17" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
-                            <Slider Grid.Column="3" x:Name="HeightRowSlider" Minimum="30" Maximum="400" Value="50" Width="200" Margin="0,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                            <Slider Grid.Column="3" x:Name="HeightRowSlider" Minimum="40" Maximum="400" Value="50" Width="200" Margin="0,0,0,5" VerticalAlignment="Bottom" HorizontalAlignment="Left" />
                             <TextBlock Grid.Row="1" Grid.Column="2" Text="Hauteur du tableau de variation : " FontSize="17" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,5,0,0"/>
                             <Slider Grid.Row="1" Grid.Column="3" x:Name="HeightTableauDeVariationSlider" Minimum="50" Maximum="600" Value="200" Width="200" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,9.5,0,0" />
 
@@ -192,8 +192,8 @@
                             <Label Content="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                             <Run Text="Pour écrire une puissance de deux par exemple, il faut taper "/><Run Text="^2" FontWeight="Bold"/><Run Text="."/>
-                            </TextBlock>                            
-                            
+                            </TextBlock>
+
                             <Label Content="Comment sortir d'une zone de saisie ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                             <Run Text="Pour sortir d'une zone de saisie, soit appuyé sur 'Entrer' pour valider, soit sur 'Échape' pour annuler."/>
@@ -213,8 +213,8 @@
                             <Label Content="Comment faire pour que les valeurs du tableau de variation se complètent seules ?"  FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
                             <Run Text="Il faut saisir une formule dans l'onglet 'Formule' en dessous de 'Formule à utiliser dans le tableau de variation'."/>
-                            </TextBlock>                            
-                            
+                            </TextBlock>
+
                             <Label Content="Pourquoi j'ai un rond barré à la place du signe ?"  FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
                             <Run Text="C'est parce que le calcul n'a pas pu se faire en l'espace de 2 secondes. C'est pour éviter que le logiciel plante."/>
@@ -228,6 +228,8 @@
 
             </Border>
         </Grid>
+
+        <Image Source="assets/info.png" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Margin="0,2.5,2.5,0" Cursor="Hand" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
 
         <Grid Grid.RowSpan="2" x:Name="Grid_NewUpdate" Background="#CC000000" Visibility="Collapsed">
             <Border Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="550" Height="300" BorderBrush="Black" BorderThickness="3,3,3,3" CornerRadius="20,20,20,20">
@@ -255,30 +257,36 @@
             </Border>
         </Grid>
 
-        <Image Source="assets/info.png" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Margin="0,2.5,2.5,0" Cursor="Hand" MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
         <Grid Grid.RowSpan="2" x:Name="Grid_Information" Background="#CC000000" Visibility="Hidden">
-            <Border Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="550" Height="300" BorderBrush="Black" BorderThickness="3,3,3,3" CornerRadius="20,20,20,20">
+            <Border Background="White" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" MinHeight="375" BorderBrush="Black" BorderThickness="3,3,3,3" CornerRadius="20,20,20,20">
                 <Grid>
 
-                    <StackPanel Margin="10,0,10,0">
+                    <StackPanel Margin="10,0,10,10">
                         <TextBlock Text="SignaMath" FontSize="30" HorizontalAlignment="Center" Margin="0,15,0,0"/>
                         <TextBlock FontSize="17" HorizontalAlignment="Center">
                             <Run Text="Version " FontSize="16"/><Run x:Name="Run_Version"  Text="1.0.0"/>
                         </TextBlock>
 
-                        <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="/assets/icon.png" VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Margin="0,15,0,0" />
+                        <Image RenderOptions.BitmapScalingMode="NearestNeighbor" Source="/assets/icon.png" VerticalAlignment="Center" HorizontalAlignment="Center" Width="100" Margin="0,40,0,0" />
 
                         <TextBlock TextWrapping="Wrap" FontSize="16" Margin="0,30,0,0" TextAlignment="Center">
                             <Run Text="Logiciel développé par Rayane Staszewski"/><LineBreak/>
-                            <Hyperlink NavigateUri="https://www.github.com/zonetecde/SignaMath" RequestNavigate="Hyperlink_RequestNavigate">Site internet</Hyperlink><Run Text=" | "/><Hyperlink NavigateUri="https://www.buymeacoffee.com/zonetecde" RequestNavigate="Hyperlink_RequestNavigate">M'acheter un café</Hyperlink>
+                            <Hyperlink NavigateUri="https://www.github.com/zonetecde/SignaMath" RequestNavigate="Hyperlink_RequestNavigate">Site internet</Hyperlink><Run Text=" | "/><Hyperlink NavigateUri="https://www.buymeacoffee.com/zonetecde" RequestNavigate="Hyperlink_RequestNavigate">M'acheter un café</Hyperlink><Run Text=" | "/><Hyperlink NavigateUri="google.com" RequestNavigate="Hyperlink_RequestNavigate_SendSuggestion">Envoyer un commentaire</Hyperlink>
                         </TextBlock>
 
-                        <TextBlock Margin="5,12.5,0,0">
-                                                        <Run Text="Ce logiciel est distribué sous licence CC BY-NC."/><LineBreak/>
-                        </TextBlock>
-
+                        <StackPanel Visibility="Collapsed" x:Name="Grid_SendSuggestion" Margin="0,10,0,30">
+                            <Label Content="Nom / E-mail" Margin="20,0,0,0"/>
+                            <TextBox x:Name="TextBox_nom" Height="35" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="20,0,20,0" Width="250" HorizontalAlignment="Left" Padding="10,0,0,0" FontSize="14"/>
+                            <Label Content="Commentaire / Suggestion" Margin="20,0,0,0"/>
+                            <RichTextBox x:Name="richtextbox_commentaire" Height="100" VerticalAlignment="Top" VerticalContentAlignment="Center" Margin="20,0,20,0" HorizontalAlignment="Left" FontSize="14" Padding="10,10,10,10"/>
+                            <Button Height="30" Margin="20,5,0,0" HorizontalAlignment="Left" Width="150" Background="#FFE4FFE7" Content="Envoyer !" Click="Button_SendComment_Click" Cursor="Hand"/>
+                            <Label x:Name="label_thanks" Content="Merci pour votre commentaire ! :)" Margin="175,-25,0,0" Visibility="Collapsed"/>
+                        </StackPanel>
 
                     </StackPanel>
+                    <TextBlock Margin="20,0,0,0" VerticalAlignment="Bottom">
+                        <Run Text="Ce logiciel est distribué sous licence CC BY-NC."/><LineBreak/>
+                    </TextBlock>
                     <Button Content="X" Background="#FFFFE1E1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25" Margin="0,10,10,0" FontFamily="Consolas" Padding="1,0,1,0" FontSize="16" ButtonBase.Click="Button_CloseHelp_Click"/>
                 </Grid>
             </Border>
