@@ -14,6 +14,9 @@ namespace SignaMath.Classes
         // Utilisé lorsque l'utilisateur écris une fonction entière
         internal static bool AllowFocusWhenAdded { get; set; } = true;
 
+        // Valide les formulas box uniquement si la touche 'Entrer' est pressé
+        internal static bool OnlyEnter { get; set; } = true;
+
         // Défini la ligne d'ordonné où l'on veut voir si la courbe la coupe
         // Par défaut : 0 -> Permet d'étudier le signe
         internal static double Y { get; set; } = 0;

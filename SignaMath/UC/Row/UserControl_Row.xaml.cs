@@ -88,7 +88,7 @@ namespace SignaMath
                     double writedInterval = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin);
                     if (GlobalVariable.IntervalleMax >= writedInterval)
                         GlobalVariable.IntervalleMin = writedInterval;
-                    else throw new Exception(); // intervalle min plus grand que intervalle max
+                    else throw new Exception("_L'intervalle minimum ne peut pas être supérieur à l'intervalle maximum."); // intervalle min plus grand que intervalle max
                     GlobalVariable.UpdateColumn();
                 };
 
@@ -102,7 +102,7 @@ namespace SignaMath
                     double writedInterval = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax);
                     if (GlobalVariable.IntervalleMin <= writedInterval)
                         GlobalVariable.IntervalleMax = writedInterval;
-                    else throw new Exception(); // intervalle max plus petit que intervalle min
+                    else throw new Exception("_L'intervalle maximum ne peut pas être inférieur à l'intervalle minimum."); // intervalle max plus petit que intervalle min
                     GlobalVariable.UpdateColumn();
                 };
 
@@ -136,7 +136,7 @@ namespace SignaMath
                     if (char.IsDigit(Convert.ToChar(newFormula)) || newFormula.Length != 1 || newFormula == "e")
                         // Va donner une indications visuelle à l'utilisateur que 
                         // le nom de la variable écrite n'est pas correct.
-                        throw new Exception();
+                        throw new Exception("_Le nom de la variable doit être une lettre qui n'est pas 'e'.");
 
                     char oldLetter = GlobalVariable.VariableName;
                     GlobalVariable.VariableName = Convert.ToChar(newFormula);
@@ -418,8 +418,7 @@ namespace SignaMath
                                     Entity result = expression.EvalNumerical();
 
                                     if (Extension.Extension.StrToDouble(result.EvalNumerical().Stringize()) < 0)
-                                        throw new Exception();
-
+                                        throw new Exception("_Une racine carrée ne peut pas avoir un contenu négatif.");
                                 }
                             }
 
@@ -456,7 +455,7 @@ namespace SignaMath
                             string formule = TextBox_Expression.textBox_clear.Text;
 
                             // on cherche par quoi on va remplacer x pour avec une efficacité maximale
-                            double variable = 0;
+                            double variable = 1; // on ne met pas 0 car x^x = 0 crash
                             if (GlobalVariable.IntervalleMin != double.MinValue)
                                 variable = GlobalVariable.IntervalleMin;
                             else if (GlobalVariable.IntervalleMax != double.MaxValue)

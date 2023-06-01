@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:SignaMath.UC"
         xmlns:local2="clr-namespace:SignaMath"
         mc:Ignorable="d"
-        Title="SignaMath"  FontFamily="{StaticResource jakarta_regular}" MinHeight="768" MinWidth="1024" d:Width="1400" Icon="assets/icon.png" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen">
+        Title="SignaMath"  FontFamily="{StaticResource jakarta_regular}" MinHeight="700" MinWidth="1000" d:Width="1200" Icon="assets/icon.png" ContentRendered="Window_ContentRendered" WindowStartupLocation="CenterScreen">
     <Window.Background>
         <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
             <GradientStop Color="#FFFAFFF9" Offset="0.143"/>
@@ -25,7 +25,7 @@
         <Image x:Name="img_arrowTemplateTop" Source="/assets/arrow_top.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed"/>
         <Image x:Name="img_arrowTemplateBottom" Source="assets/arrow_bottom.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Visibility="Collapsed"/>
         <!-- -->
-
+        
         <Border  Grid.Row="0" Margin="20,10,20,0">
             <TabControl FocusVisualStyle="{x:Null}" Height="100" BorderBrush="#7F000000" Background="Transparent" BorderThickness="0.5,0.5,0.5,0.5"  >
 
@@ -40,18 +40,27 @@
                                 <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="50px"/>
                                 <ColumnDefinition Width="auto"/>
-                                <ColumnDefinition Width="50px"/>
                                 <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="50px"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left">
+                                <Label Content="Fonction du tableau de signe :" Margin="18,0,0,0" Foreground="#B2000000"/>
                                 <DockPanel>
-                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_fName" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,0,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
-                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,0,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Left"  x:Name="formulaTextBox_fName" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" MinWidth="50" MinHeight="50" HorizontalAlignment="Left" Margin="20,-10,0,0" ToolTip="Format : f(x) et remplacez 'f' et 'x'"/>
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_content" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,-10,0,0" HorizontalAlignment="Left" ToolTip="Séparer les expressions qui doivent être dans différentes lignes du tableau par des parenthèses"/>
                                 </DockPanel>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="2" Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Left">
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Left">
+                                <Grid>
+                                    <Label Content="Formule à utiliser dans le tableau de variation :" Foreground="#B2000000"/>
+                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_tabDeVariation" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,7.5,0,0" HorizontalAlignment="Left" ToolTip="N'oubliez-pas d'utiliser la même variable que celle choisi, par défaut c'est 'x'"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="5" ToolTip="Les opérations vont être appliqué à la formule copiée dans votre presse-papiers puis afficher dans une zone de saisie à part." Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,0,15,0">
                                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <Button Content="Factoriser" Background="White" Margin="5,0,0,2.5" Width="70"  Click="Button_Factorize_Click" Height="22.5" />
                                     <Button Content="Simplifier" Background="White" Margin="5,2.5,0,0" Width="70" Click="Button_Simplify_Click" Height="22.5" />
@@ -60,17 +69,11 @@
                                     <Button Content="Dériver" Background="White" Margin="5,0,0,2.5" Width="70" Click="Button_Derive_Click" Height="22.5"/>
                                     <Button Content="Primitiver" Background="White" Margin="5,2.5,0,0" Width="70"  Click="Button_Primitive_Click" Height="22.5" />
                                 </StackPanel>
-
+                                <TextBlock TextWrapping="Wrap" Width="80" Text="(le contenu du presse-papiers)" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#7F000000" Margin="10,0,0,0"/>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Grid>
-                                    <Label Content="Formule à utiliser dans le tableau de variation :"/>
-                                    <local2:UserControl_FormulaTextBox DockPanel.Dock="Right" x:Name="formulaTextBox_tabDeVariation" Grid.Column="3" VerticalContentAlignment="Center" MinWidth="100" MinHeight="50" Margin="10,7.5,0,0" HorizontalAlignment="Left" ToolTip="N'oubliez-pas d'utiliser la même variable que celle choisi, par défaut c'est 'x'"/>
-                                </Grid>
-                            </StackPanel>
 
-                            <StackPanel Grid.Column="5" Orientation="Horizontal" HorizontalAlignment="Right" >
+                            <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right" >
                                 <Label Content="Comparer le signe par rapport à Y = " FontSize="14" VerticalAlignment="Center"/>
                                 <local2:UserControl_FormulaTextBox Grid.Column="1" x:Name="formulaBox_y"  VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="14" MinHeight="40" Margin="0,0,10,0"/>
                             </StackPanel>
@@ -156,17 +159,38 @@
                         </Grid>
                     </ScrollViewer>
                 </TabItem>
+
+                <TabItem BorderBrush="#0C000000"  Header="Paramètres" Width="150"  Background="#00000000">
+                    <Grid>
+
+                        <Label Content="Pour plus d'informations, laissez votre curseur sur un paramètre pour afficher une infobulle." HorizontalAlignment="Center" FontStyle="Italic" VerticalAlignment="Top"/>
+                        <CheckBox Content="Modification en directe" Margin="10,30,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" ToolTip="Si activé, vous verrez le tableau changer au fur et à mesure que vous tapez des formules." Checked="CheckBox_LivreWriting_CheckChanged" Unchecked="CheckBox_LivreWriting_CheckChanged"/>
+                    </Grid>
+
+                </TabItem>
             </TabControl>
 
         </Border>
 
+        <Border x:Name="border_infoBulle" HorizontalAlignment="Center" VerticalAlignment="Top" MinWidth="500" CornerRadius="0,0,20,20" Background="#FF7AE4A7">
+            <TextBlock x:Name="textBlock_InfoBulle" Text="Appuyez sur la touche &quot;Entrée&quot; pour valider la saisie" FontSize="16" Padding="20,5,20,5" TextAlignment="Center" MinHeight="20" MaxHeight="40"/>
+        </Border>
 
-        <TextBox x:Name="textBox_copiedFormula" Height="30" Grid.RowSpan="2" VerticalAlignment="Top" Margin="0,125,0,0" HorizontalAlignment="Center" Width="300" Visibility="Hidden" LostFocus="textBox_copiedFormula_LostFocus" KeyDown="textBox_copiedFormula_KeyDown" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14"/>
-
-        <Viewbox x:Name="viewBox_tableau" Grid.Row="1" Margin="50,10,50,35" >
+        <Viewbox x:Name="viewBox_tableau" Grid.Row="1" Margin="50,30,50,35" >
             <local:UserControl_TableauDeSigne  Width="{Binding ElementName=WidthSlider, Path=Value}" MinHeight="{Binding ElementName=HeightSlider, Path=Value}" x:Name="UC_TableauDeSigne"/>
         </Viewbox>
 
+        <Label Grid.RowSpan="2" Content="Afficher une zone de texte libre" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,115,0,0" ToolTip="Utile pour pouvoir copier une formule dans le presse papier puis y effectuer une opération à l'aide des 4 boutons de l'onglet &quot;Formule&quot;" FontStyle="Italic" Foreground="#7F000000" Cursor="Hand" MouseLeftButtonDown="Label_ShowFreeTextZone_MouseLeftButtonDown"/>
+
+        <Grid x:Name="Grid_copiedFormula" Visibility="Hidden" Height="30" Grid.RowSpan="2" VerticalAlignment="Top" Margin="0,120,0,0" 
+                 HorizontalAlignment="Center" Width="300">
+            <TextBox x:Name="textBox_copiedFormula" PreviewLostKeyboardFocus="textBox_copiedFormula_PreviewLostKeyboardFocus" 
+                 KeyDown="textBox_copiedFormula_KeyDown" HorizontalContentAlignment="Center" 
+                 VerticalContentAlignment="Center" FontSize="14" BorderBrush="Black"/>
+            <Button Content="Copier" HorizontalAlignment="Right" Padding="10,1,10,1" Background="White" Cursor="Hand" Margin="0,0,-60,0" Click="Button_CopyFormula_Click"/>
+        </Grid>
+
+        
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,5"  HorizontalAlignment="Center" VerticalAlignment="Bottom" >
             <Button Width="125" x:Name="button_Help" Content="Aide" Background="White" FontSize="16" ButtonBase.Click="button_Help_Click" Margin="0,0,5,0" />
             <Button Width="165" x:Name="button_Save" Content="Enregistrer"  Background="#FFFFFFFF" Click="button_Save_Click" FontSize="16" Margin="5,0,5,0" />
@@ -182,24 +206,24 @@
                     <ScrollViewer>
                         <StackPanel Margin="0,0,12.5,0">
                             <Label Content="Aide pour l'utilisation" FontSize="20" HorizontalAlignment="Center" Padding="5,0,5,5"  FontWeight="Bold"/>
-                            <Label Content="Comment écrire des racines carrées ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment écrire des racines carrées ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                         <Run Text="Pour insérer une racine carrée dans une expression, il faut écrire"/>
                         <Run Text="sqrt(x)" FontWeight="Bold"/>
                         <Run Text="en remplaçant x par le nombre souhaité, ou par une variable."/>
                             </TextBlock>
 
-                            <Label Content="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment écrire un exposant ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                             <Run Text="Pour écrire une puissance de deux par exemple, il faut taper "/><Run Text="^2" FontWeight="Bold"/><Run Text="."/>
                             </TextBlock>
 
-                            <Label Content="Comment sortir d'une zone de saisie ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment sortir d'une zone de saisie ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                             <Run Text="Pour sortir d'une zone de saisie, soit appuyé sur 'Entrer' pour valider, soit sur 'Échape' pour annuler."/>
                             </TextBlock>
 
-                            <Label Content="Comment changer le nom de la variable x ?" FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment changer le nom de la variable x ?" FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify" >
                         <Run Text="Pour changer le nom de la variable x il faut appuyer dans la cellule en haut à gauche du tableau."/>
                             </TextBlock>
@@ -210,14 +234,19 @@
                         <Run Text="Il se peut que les signes ne soient pas corrects (ce n'est cependant encore jamais arrivé). Vous pouvez corriger les signes erronés en faisant un clique gauche dessus, afin de mettre la valeur attendue. Veillez à toujours séparer le numérateur du dénominateur dans 2 lignes différentes, et à sélectionner le bon type de ligne (normal/ligne de valeur interdite)."/>
                             </TextBlock>
 
-                            <Label Content="Comment faire pour que les valeurs du tableau de variation se complètent seules ?"  FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment faire pour que les valeurs du tableau de variation se calculent seules ?"  FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
                             <Run Text="Il faut saisir une formule dans l'onglet 'Formule' en dessous de 'Formule à utiliser dans le tableau de variation'."/>
                             </TextBlock>
 
-                            <Label Content="Pourquoi j'ai un rond barré à la place du signe ?"  FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" Text="Comment utiliser les 4 boutons de l'onglet 'Formule' ?"  FontSize="20" Margin="0,10,0,0" />
                             <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
-                            <Run Text="C'est parce que le calcul n'a pas pu se faire en l'espace de 2 secondes. C'est pour éviter que le logiciel plante."/>
+                            <Run Text="Il faut avoir copié une formule dans votre presse-papiers. Ensuite, les boutons vont effectuer une opération sur celle-ci et l'afficher dans une zone séparée."/>
+                            </TextBlock>
+
+                            <TextBlock TextWrapping="Wrap" Text="Pourquoi j'ai un rond barré à la place du signe ?"  FontSize="20" Margin="0,10,0,0" />
+                            <TextBlock TextWrapping="Wrap" FontSize="16" TextAlignment="Justify"  >
+                            <Run Text="C'est parce que le calcul n'a pas pu se faire en l'espace de 2 secondes. Cela évite que le logiciel ne réponde plus."/>
                             </TextBlock>
                         </StackPanel>
 

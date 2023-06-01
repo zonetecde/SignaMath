@@ -8,7 +8,7 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Border x:Name="Border_Main" BorderBrush="Black">
         <Grid>
-            <Label x:Name="Label_Sign" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewMouseLeftButtonUp="Label_Sign_PreviewMouseLeftButtonUp" Margin="0,0,0,2.5"/>
+            <Label x:Name="Label_Sign" FontSize="24" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Cursor="Hand" HorizontalAlignment="Center" VerticalAlignment="Center" PreviewMouseLeftButtonUp="Label_Sign_PreviewMouseLeftButtonUp" Margin="0,0,0,0"/>
 
             <Border x:Name="Border_SecondeBarre" BorderBrush="Black" HorizontalAlignment="Right" BorderThickness="0,0,2,0" Margin="0,0,5,0" Visibility="Hidden"/>
             <Label x:Name="Label_Zero" FontFamily="Corial" VerticalAlignment="Center" HorizontalAlignment="Right" Content="0" FontSize="24" Margin="0,5,-12,0" Visibility="Hidden"/>

@@ -1,4 +1,5 @@
 ﻿using AngouriMath.Extensions;
+using SignaMath.Classes;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -33,6 +34,7 @@ namespace SignaMath
                 previousFormula = formulaControl_formatted.Formula;
                 DefaultFormula = formulaControl_formatted.Formula;
                 previousText = textBox_clear.Text;
+                MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Hidden;
             };
         }
 
@@ -56,6 +58,7 @@ namespace SignaMath
             textBox_clear.Text = previousText;
             textBox_clear.Visibility = Visibility.Collapsed;
             formulaControl_formatted.Visibility = Visibility.Visible;
+            MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Hidden;
 
             if(AllowEmpty && String.IsNullOrEmpty(textBox_clear.Text))
             {
@@ -70,16 +73,62 @@ namespace SignaMath
         {
             if (e.Key == Key.Enter)
             {
-                textBox_clear_LostFocus(this, null); // Appelle la méthode de perte de focus pour la zone de texte non formatée
+                // Si on doit presser entrer pour valider
+                if(GlobalVariable.OnlyEnter)
+                {
+                    // Vérifie que la formule en elle même est valide
+                    if (textBox_clear.Background != Brushes.LightPink)
+                    {
+                        try
+                        {
+                            // Passe le teste de la fonction (si elle est invalide ce sera dans le catch())
+                            if (FormulaChanged != null)                           
+                                FormulaChanged!(textBox_clear.Text, true);
+                            
+
+                            textBox_clear_LostFocus(this, null);
+                            MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Hidden;
+                        }
+                        catch (Exception ex)
+                        {
+                            if (AllowEmpty && String.IsNullOrEmpty(textBox_clear.Text))
+                            {
+                                formulaControl_formatted.Formula = string.Empty; // Efface la formule formatée
+                                textBox_clear_LostFocus(this, null);
+                            }
+                            else
+                            {
+                                textBox_clear.Background = Brushes.LightPink; // Définit le fond de la zone de texte non formatée comme rose clair en cas d'erreur
+
+                                if (ex.Message.StartsWith('_')) // exception controllée
+                                    MainWindow._MainWindow.textBlock_InfoBulle.Text = ex.Message.Remove(0, 1);
+                                else
+                                    MainWindow._MainWindow.textBlock_InfoBulle.Text = "La formule entrée n'est pas correcte";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    textBox_clear_LostFocus(this, null); // Appelle la méthode de perte de focus pour la zone de texte non formatée
+                }
             }
             else if(e.Key == Key.Escape)
             {
-                // valeur par défaut
+                // remet les dernieres valeurs valide entrée par l'utilisateur
                 formulaControl_formatted.Formula = previousFormula;
                 textBox_clear.Text = previousText;
                 textBox_clear.Visibility = Visibility.Collapsed; 
                 formulaControl_formatted.Visibility = Visibility.Visible;
+                MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Hidden;
             }
+            else if (e.Key == Key.Oem6)
+            {
+                int cursorPos = textBox_clear.SelectionStart;  // Obtient la position du curseur dans la zone de texte
+                textBox_clear.Text = textBox_clear.Text.Insert(cursorPos, "^");  // Insère le symbole '^' à la position du curseur
+                textBox_clear.SelectionStart = cursorPos + 1;  // Déplace le curseur après le symbole '^' inséré
+            }
+
         }
 
         /// <summary>
@@ -91,15 +140,21 @@ namespace SignaMath
             {
                 string newFormula = textBox_clear.Text.Replace(',', '.').Trim();
 
-                // si on a une exprresion du type x4, on remplace par x*4 car sinon c'est compté comme x^4.
-                string pattern = @"x(\d)";
-                string temp = newFormula;
-                newFormula = Regex.Replace(newFormula, pattern, "x*$1");
-                if (temp != newFormula)
+                // remplace ^^ par un seul ^
+                if(newFormula.Contains("^^"))
                 {
+                    int temp = textBox_clear.CaretIndex - 1;
+                    newFormula = newFormula.Replace("^^", "^");
                     textBox_clear.Text = newFormula;
-                    textBox_clear.CaretIndex = textBox_clear.Text.Length;
+                    textBox_clear.CaretIndex = temp;
                     return;
+                }
+
+                // si on a une exprresion du type x4, on avertit l'utilisateur que ça va faire x^4
+                string pattern = @"x(\d)";
+                if (Regex.Replace(newFormula, pattern, "x*$1") != newFormula)
+                {
+                    MainWindow._MainWindow.textBlock_InfoBulle.Text = "Attention, " + GlobalVariable.VariableName + "[nbre] revient à faire " + GlobalVariable.VariableName + "^[nbre]";
                 }
 
                 string latexExp;
@@ -130,16 +185,28 @@ namespace SignaMath
 
                     if (FormulaChanged != null)
                     {
-                        FormulaChanged(textBox_clear.Text, true); // Appelle l'action de notification de changement de formule
-
-                        // Si on est jusqu'ici c'est que tout est bon, la formule est valide
-                        previousText =newFormula;
-                        previousFormula = formulaControl_formatted.Formula;
+                        // Si live writing OU que la textbox n'est pas focus = c'est un changement venant d'une assignation depuis textBox.Text =
+                        if (!GlobalVariable.OnlyEnter || !textBox_clear.IsFocused)
+                        {
+                            FormulaChanged(textBox_clear.Text, true); // Appelle l'action de notification de changement de formule
+                        }
+                        else
+                        {
+                            MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Visible;
+                            MainWindow._MainWindow.textBlock_InfoBulle.Text = "Appuyez sur la touche \"Entrée\" pour valider la saisie";
+                        }
                     }
+
+                    // Si on est jusqu'ici c'est que tout est bon, la formule est valide
+                    previousText = newFormula;
+                    previousFormula = formulaControl_formatted.Formula;
                 }
                 else
                 {
                     textBox_clear.Background = Brushes.LightPink; // Définit le fond de la zone de texte non formatée comme rose clair en cas de formule invalide
+                    
+                    MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Visible;
+                    MainWindow._MainWindow.textBlock_InfoBulle.Text = "La formule entrée n'est pas correcte";
                 }
             }
             catch (Exception ex)
@@ -151,7 +218,12 @@ namespace SignaMath
                 else
                 {
                     textBox_clear.Background = Brushes.LightPink; // Définit le fond de la zone de texte non formatée comme rose clair en cas d'erreur
-                    Console.WriteLine(ex.Message); // Affiche l'exception dans la console
+                    
+                    MainWindow._MainWindow.border_infoBulle.Visibility = Visibility.Visible;
+                    if(ex.Message.StartsWith('_')) // exception controllée
+                        MainWindow._MainWindow.textBlock_InfoBulle.Text = ex.Message.Remove(0,1);
+                    else
+                        MainWindow._MainWindow.textBlock_InfoBulle.Text = "La formule entrée n'est pas correcte";
                 }
             }
         }

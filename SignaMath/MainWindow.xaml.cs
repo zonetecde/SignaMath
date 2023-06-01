@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -34,7 +35,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.2";
+        private const string VERSION = "1.1.3";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -105,12 +106,13 @@ namespace SignaMath
                 }
                 else
                 {
-                    Button_AjoutTableauVariation_Click(this, null);
+                    if(TableauDeSigne.StackPanel_Row.Children.Count >1) // si on a au moins une colonne
+                        Button_AjoutTableauVariation_Click(this, null);
                 }
             }
             else
             {
-                throw new Exception();
+                throw new Exception("_La formule doit posséder au moins une occurrence de '" + GlobalVariable.VariableName +"'.");
             }
         }
 
@@ -152,7 +154,7 @@ namespace SignaMath
                             });
                         }
                         else
-                            throw new Exception();
+                            throw new Exception("_La variable ne peut être 'e' car 'e' est réservé pour l'exponentielle");
                     }
 
                     if (!char.IsDigit(newFuncName[0]))
@@ -172,8 +174,8 @@ namespace SignaMath
                     return;
                 }
 
-            }          
-            throw new Exception();        
+            }
+            throw new Exception("_Le format du nom de la fonction doit être `f(x)`");       
         }
 
         /// <summary>
@@ -601,13 +603,14 @@ namespace SignaMath
         {
             try
             {
-                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity expr = Clipboard.GetText().ToEntity();
                 Entity result = expr.Simplify();
-                formulaTextBox_content.textBox_clear.Text = (result.ToString());
+                SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
                 // Simplification impossible
+                ShowQuickMessage("Simplification impossible, vérifiez la formule dans votre presse-papiers");
             }
         }
 
@@ -618,13 +621,14 @@ namespace SignaMath
         {
             try
             {
-                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity expr = Clipboard.GetText().ToEntity();
                 Entity result = expr.Differentiate(Char.ToString(GlobalVariable.VariableName)).Simplify();
                 SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
                 // Dérivation impossible
+                ShowQuickMessage("Dérivation impossible, vérifiez la formule dans votre presse-papiers");
             }
         }
 
@@ -636,7 +640,7 @@ namespace SignaMath
         private void SetCopiedFormulaTextBox(string result)
         {
             textBox_copiedFormula.Text = result;
-            textBox_copiedFormula.Visibility = Visibility.Visible;
+            Grid_copiedFormula.Visibility = Visibility.Visible;
             textBox_copiedFormula.Focus();
             textBox_copiedFormula.SelectAll();
         }
@@ -648,7 +652,7 @@ namespace SignaMath
         {
             try
             {
-                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity expr = Clipboard.GetText().ToEntity();
                 Entity result = expr.Integrate(Char.ToString(GlobalVariable.VariableName));
                 if(result is not Integralf)
                     SetCopiedFormulaTextBox(result.Simplify().ToString());
@@ -656,6 +660,7 @@ namespace SignaMath
             catch
             {
                 // Primitive impossible
+                ShowQuickMessage("Primitive impossible, vérifiez la formule dans votre presse-papiers");
             }
         }        
         
@@ -666,13 +671,14 @@ namespace SignaMath
         {
             try
             {
-                Entity expr = formulaTextBox_content.textBox_clear.Text.ToEntity();
+                Entity expr =   Clipboard.GetText().ToEntity();
                 Entity result = expr.Factorize();
                 SetCopiedFormulaTextBox(result.ToString());
             }
             catch
             {
                 // Factorisation impossible
+                ShowQuickMessage("Factorisation impossible, vérifiez la formule dans votre presse-papiers");
             }
         }
 
@@ -700,10 +706,18 @@ namespace SignaMath
         /// <summary>
         /// Stop trigger de la textbox pour copier une formule
         /// </summary>
-        private void textBox_copiedFormula_LostFocus(object sender, RoutedEventArgs e)
+        private void textBox_copiedFormula_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            textBox_copiedFormula.Visibility = Visibility.Hidden;
+            if (e.NewFocus is Button)
+            {
+                e.Handled = true; // Empêche la perte de focus
+            }
+            else
+            {
+                Grid_copiedFormula.Visibility = Visibility.Hidden;
+            }
         }
+
 
         /// <summary>
         /// Stop trigger de la textbox pour copier une formule
@@ -712,7 +726,7 @@ namespace SignaMath
         {
             if(e.Key == System.Windows.Input.Key.Enter || e.Key == System.Windows.Input.Key.Escape)
             {
-                textBox_copiedFormula.Visibility = Visibility.Hidden;
+                Grid_copiedFormula.Visibility = Visibility.Hidden;
             }
         }
 
@@ -760,6 +774,52 @@ namespace SignaMath
             {
                 label_thanks.Content = "Désolé, un problème est survenu lors de l'envoi. Merci de l'envoyer manuellement à zonedetec@gmail.com !";
             }
+        }
+
+        /// <summary>
+        /// L'utilisateur ne veut pas appuyer sur entrée pour valider / live writing
+        /// </summary>
+        private void CheckBox_LivreWriting_CheckChanged(object sender, RoutedEventArgs e)
+        {
+            GlobalVariable.OnlyEnter = !((CheckBox)sender).IsChecked!.Value;
+        }
+
+        /// <summary>
+        /// Copie la formule à laquelle une opération vient d'être effectuée
+        /// </summary>
+        private void Button_CopyFormula_Click(object sender, RoutedEventArgs e)
+        {
+            ShowQuickMessage("Copié !");
+            Clipboard.SetText(textBox_copiedFormula.Text);
+            textBox_copiedFormula.Focus();
+            Grid_copiedFormula.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Affiche un message dans l'infobulle en haut de l'écran pour 2 secondes
+        /// </summary>
+        private void ShowQuickMessage(string msg)
+        {
+            border_infoBulle.Visibility = Visibility.Visible;
+            textBlock_InfoBulle.Text = msg;
+
+            Timer t = new Timer(2000);
+            t.Elapsed += (s,e) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    border_infoBulle.Visibility = Visibility.Hidden;
+                });
+            };
+            t.Start();
+        }
+
+        /// <summary>
+        /// Affiche la zone de texte libre
+        /// </summary>
+        private void Label_ShowFreeTextZone_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            SetCopiedFormulaTextBox(textBox_copiedFormula.Text);
         }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -113,7 +114,7 @@ namespace SignaMath.Extension
                 else
                 {
                     // Si la conversion échoue et qu'on ne s'intéresse pas uniquement au signe, on lance une exception
-                    throw new Exception();
+                    throw new Exception("_Impossible de convertir " + expBrute + " en nombre.");
                 }
             }
 
@@ -131,7 +132,7 @@ namespace SignaMath.Extension
             }
             else
             {
-                throw new Exception();
+                throw new Exception("_Impossible de convertir " + expression + " en nombre.");
             }
         }
     }
