@@ -15,6 +15,7 @@ Utilisation non commerciale signifie que l’utilisation n’a pas principalemen
 Partager signifie mettre une œuvre à la disposition du public par tout moyen ou procédé qui requiert l’autorisation découlant des Droits accordés par la licence, tels que les droits de reproduction, de représentation au public, de distribution, de diffusion, de communication ou d’importation, y compris de manière à ce que chacun puisse y avoir accès de l’endroit et au moment qu’il choisit individuellement.
 Droit sui generis des producteurs de bases de données signifie droits distincts du droit d'auteur résultant de la Directive 96/9/CE du Parlement européen et du Conseil du 11 mars 1996 sur la protection juridique des bases de données, ainsi que tout autre droit de nature équivalente dans le monde.
 Vous (preneur de licence) se rapporte à tout individu ou entité exerçant les Droits accordés par la licence. Votre et Vos renvoient également au preneur de licence.
+
 Article 2 - Champ d’application de la présente Licence publique.
 
 Octroi de la licence.
@@ -33,6 +34,7 @@ Autres droits.
 Les droits moraux, tel que le droit à l’intégrité de l’œuvre, ne sont pas accordés par la présente Licence publique, ni le droit à l’image, ni le droit au respect de la vie privée, ni aucun autre droit de la personnalité ou apparenté ; cependant, dans la mesure du possible, le Donneur de licence renonce et/ou accepte de ne pas faire valoir les droits qu’il détient de manière à Vous permettre d’exercer les Droits accordés par la licence.
 Le droit des brevets et le droit des marques ne sont pas concernés par la présente Licence publique.
 Dans la mesure du possible, le Donneur de licence renonce au droit de collecter des redevances auprès de Vous pour l’exercice des Droits accordés par la licence, directement ou indirectement dans le cadre d’un régime de gestion collective facultative ou obligatoire assorti de possibilités de renonciation quel que soit le type d’accord ou de licence. Dans tous les autres cas, le Donneur de licence se réserve expressément le droit de collecter de telles redevances, y compris en dehors des cas d'Utilisation non commerciale de l’Œuvre sous licence.
+
 Article 3 – Conditions d'utilisation de la présente Licence publique.
 
 L’exercice des Droits accordés par la licence est expressément soumis aux conditions suivantes.
@@ -52,6 +54,7 @@ Indiquer si l’Œuvre sous licence est mise à disposition en vertu de la prés
 Vous pouvez satisfaire aux conditions de l’Article 3(a)(1) dans toute la mesure du possible, en fonction des supports, moyens et contextes dans lesquels Vous Partagez l’Œuvre sous licence. Par exemple, Vous pouvez satisfaire aux conditions susmentionnées en fournissant l’URI ou l’hyperlien vers la ressource incluant les informations requises.
 Bien que requises aux termes de l’Article 3(a)(1)(A), certaines informations devront être retirées, dans la mesure du possible, si le Donneur de licence en fait la demande.
 Si Vous Partagez une Œuvre dérivée que Vous avez réalisée, la Licence d’Œuvre dérivée que Vous utilisez ne doit pas porter atteinte au respect de la présente Licence publique par les utilisateurs de l’Œuvre dérivée.
+
 Article 4 – Le Droit sui generis des producteurs de bases de données.
 
 Lorsque les Droits accordés par la licence incluent le Droit sui generis des producteurs de bases de données applicable à Votre utilisation de l’Œuvre sous licence :
@@ -60,11 +63,13 @@ afin de lever toute ambiguïté, l’Article 2(a)(1) Vous accorde le droit d’e
 si Vous incluez la totalité ou une partie substantielle du contenu de la base de données dans une base de données pour laquelle Vous détenez un Droit sui generis de producteur de bases de données, la base de données sur laquelle Vous détenez un tel droit (mais pas ses contenus individuels) sera alors considérée comme une Œuvre dérivée ; et
 Vous devez respecter les conditions de l’Article 3(a) si Vous Partagez la totalité ou une partie substantielle du contenu des bases de données.
 Afin de lever toute ambiguïté, le présent Article 4 complète mais ne remplace pas Vos obligations découlant des termes de la présente Licence publique lorsque les Droits accordés par la licence incluent d’autres Droit d’auteur et droits connexes.
+
 Article 5 – Limitations de garantie et exclusions de responsabilité.
 
 Sauf indication contraire et dans la mesure du possible, le Donneur de licence met à disposition l’Œuvre sous licence telle quelle, et n’offre aucune garantie de quelque sorte que ce soit, notamment expresse, implicite, statutaire ou autre la concernant. Cela inclut, notamment, les garanties liées au titre, à la valeur marchande, à la compatibilité de certaines utilisations particulières, à l’absence de violation, à l’absence de vices cachés ou autres défauts, à l’exactitude, à la présence ou à l’absence d’erreurs connues ou non ou susceptibles d’être découvertes dans l’Œuvre sous licence. Lorsqu’une limitation de garantie n’est pas autorisée en tout ou partie, cette clause peut ne pas Vous être applicable.
 Dans la mesure du possible, le Donneur de licence ne saurait voir sa responsabilité engagée vis-à-vis de Vous, quel qu’en soit le fondement juridique (y compris, notamment, la négligence), pour tout préjudice direct, spécial, indirect, incident, conséquentiel, punitif, exemplaire, ou pour toutes pertes, coûts, dépenses ou tout dommage découlant de l’utilisation de la présente Licence publique ou de l’utilisation de l’Œuvre sous licence, même si le Donneur de licence avait connaissance de l’éventualité de telles pertes, coûts, dépenses ou dommages. Lorsqu’une exclusion de responsabilité n’est pas autorisée en tout ou partie, cette clause peut ne pas Vous être applicable.
 Les limitations de garantie et exclusions de responsabilité ci-dessus doivent être interprétées, dans la mesure du possible, comme des limitations et renonciations totales de toute responsabilité.
+
 Article 6 – Durée et fin.
 
 La présente Licence publique s’applique pendant toute la durée de validité des Droits accordés par la licence. Cependant, si Vous manquez à Vos obligations prévues par la présente Licence publique, Vos droits accordés par la présente Licence publique seront automatiquement révoqués.
