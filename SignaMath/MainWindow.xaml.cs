@@ -35,7 +35,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.3";
+        private const string VERSION = "1.1.4";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -246,6 +246,9 @@ namespace SignaMath
         /// </summary>
         private void Button_AddRow_Click(object sender, RoutedEventArgs? e)
         {
+            // Supprime toutes les rows avec une textbox vide
+            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Where(x => String.IsNullOrEmpty(x.TextBox_Expression.textBox_clear.Text)).ToList().ForEach(x => TableauDeSigne.StackPanel_Row.Children.Remove(x));
+
             UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
 
             button_AjoutLigneConcluante.IsEnabled = true;
@@ -255,11 +258,32 @@ namespace SignaMath
         }
 
         /// <summary>
+        /// Méthode appelée lors du clic sur le bouton "Ajouter une valeur interdite".
+        /// Ajoute une ligne au tableau avec une valeur interdite.
+        /// </summary>
+        private void Button_AddForbiddenValueRow_Click(object sender, RoutedEventArgs? e)
+        {
+            // Supprime toutes les rows avec une textbox vide
+            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Where(x => String.IsNullOrEmpty(x.TextBox_Expression.textBox_clear.Text)).ToList().ForEach(x => TableauDeSigne.StackPanel_Row.Children.Remove(x));
+
+            UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE_INTERDITE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
+
+            button_AjoutLigneConcluante.IsEnabled = true;
+            button_AjoutTableauVariation.IsEnabled = true;
+
+            MoveDownConclusionRow();
+        }
+
+
+        /// <summary>
         /// Méthode appelée lors du clic sur le bouton "Ajouter une ligne concluante".
         /// Ajoute ou supprime une ligne concluante du tableau.
         /// </summary>
         internal void Button_AjoutLigneConcluante_Click(object sender, RoutedEventArgs? e)
         {
+            // Supprime toutes les rows avec une textbox vide
+            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Where(x => String.IsNullOrEmpty(x.TextBox_Expression.textBox_clear.Text)).ToList().ForEach(x => TableauDeSigne.StackPanel_Row.Children.Remove(x));
+
             if (button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
             {
                 UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.CONCLUANTE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
@@ -280,46 +304,14 @@ namespace SignaMath
         }
 
         /// <summary>
-        /// Méthode appelée lors du clic sur le bouton "Ajouter une valeur interdite".
-        /// Ajoute une ligne au tableau avec une valeur interdite.
-        /// </summary>
-        private void Button_AddForbiddenValueRow_Click(object sender, RoutedEventArgs? e)
-        {
-            UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.MIDDLE_INTERDITE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
-
-            button_AjoutLigneConcluante.IsEnabled = true;
-            button_AjoutTableauVariation.IsEnabled = true;
-
-            MoveDownConclusionRow();
-        }
-
-        /// <summary>
-        /// Déplace la ligne concluante et le tableau de variation vers la fin du tableau.
-        /// </summary>
-        private void MoveDownConclusionRow()
-        {
-            if (!button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
-            {
-                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.CONCLUANTE));
-                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.CONCLUANTE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
-            }
-
-            if (!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
-            {
-                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.TABLEAU_DE_VARIATION));
-                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
-                {
-                    Height = HeightTableauDeVariationSlider.Value,
-                });
-            }
-        }
-
-        /// <summary>
         /// Méthode appelée lors du clic sur le bouton "Ajouter le tableau de variation".
         /// Ajoute ou supprime le tableau de variation du tableau.
         /// </summary>
         internal void Button_AjoutTableauVariation_Click(object sender, RoutedEventArgs? e)
         {
+            // Supprime toutes les rows avec une textbox vide
+            TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Where(x => String.IsNullOrEmpty(x.TextBox_Expression.textBox_clear.Text)).ToList().ForEach(x => TableauDeSigne.StackPanel_Row.Children.Remove(x));
+
             if (button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
             {
                 if (button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
@@ -340,6 +332,27 @@ namespace SignaMath
             {
                 UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().FindAll(x => x.RowType == RowType.TABLEAU_DE_VARIATION).First());
                 button_AjoutTableauVariation.Content = "Ajouter le tableau de variation";
+            }
+        }
+
+        /// <summary>
+        /// Déplace la ligne concluante et le tableau de variation vers la fin du tableau.
+        /// </summary>
+        private void MoveDownConclusionRow()
+        {
+            if (!button_AjoutLigneConcluante.Content.ToString()!.Contains("Ajouter"))
+            {
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.CONCLUANTE));
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.CONCLUANTE, new Random().Next(999999)) { Height = HeightRowSlider.Value });
+            }
+
+            if (!button_AjoutTableauVariation.Content.ToString()!.Contains("Ajouter"))
+            {
+                UC_TableauDeSigne.StackPanel_Row.Children.Remove(UC_TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().ToList().First(x => x.RowType == RowType.TABLEAU_DE_VARIATION));
+                UC_TableauDeSigne.StackPanel_Row.Children.Add(new UserControl_Row(RowType.TABLEAU_DE_VARIATION, new Random().Next(999999))
+                {
+                    Height = HeightTableauDeVariationSlider.Value,
+                });
             }
         }
 
@@ -591,7 +604,7 @@ namespace SignaMath
         /// <summary>
         /// Actualise le tableau
         /// </summary>
-        private void button_RefreshBoard_Click(object sender, RoutedEventArgs e)
+        internal void button_RefreshBoard_Click(object sender, RoutedEventArgs? e)
         {
             GlobalVariable.UpdateColumn();
         }
@@ -820,6 +833,38 @@ namespace SignaMath
         private void Label_ShowFreeTextZone_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             SetCopiedFormulaTextBox(textBox_copiedFormula.Text);
+        }
+
+        /// <summary>
+        /// Ajoute une ligne au tableau
+        /// </summary>
+        private void MenuItem_AddRow_Click(object sender, RoutedEventArgs e)
+        {
+            Button_AddRow_Click(this, null);
+        }
+
+        /// <summary>
+        /// Ajoute une ligne de valeur interdite au tableau
+        /// </summary>
+        private void MenuItem_AddForbiddenValueRow_Click(object sender, RoutedEventArgs e)
+        {
+            Button_AddForbiddenValueRow_Click(this, null);
+        }
+
+        /// <summary>
+        /// Ajoute une ligne concluante
+        /// </summary>
+        private void MenuItem_AddConclusionRow_Click(object sender, RoutedEventArgs e)
+        {
+            Button_AjoutLigneConcluante_Click(this, null);
+        }
+
+        /// <summary>
+        /// Ajoute le tableau de variation
+        /// </summary>
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Button_AjoutTableauVariation_Click(this, null);
         }
     }
 }

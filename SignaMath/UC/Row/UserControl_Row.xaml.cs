@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using static AngouriMath.Entity;
 
@@ -87,9 +88,11 @@ namespace SignaMath
                 {
                     double writedInterval = newIntervalMin.Replace(" ", string.Empty) == "-\\infty" ? double.MinValue : Extension.Extension.StrToDouble(newIntervalMin);
                     if (GlobalVariable.IntervalleMax >= writedInterval)
+                    {
                         GlobalVariable.IntervalleMin = writedInterval;
+                        MainWindow._MainWindow.button_RefreshBoard_Click(this, null);
+                    }
                     else throw new Exception("_L'intervalle minimum ne peut pas être supérieur à l'intervalle maximum."); // intervalle min plus grand que intervalle max
-                    GlobalVariable.UpdateColumn();
                 };
 
                 UC_borneMax = new();
@@ -101,9 +104,11 @@ namespace SignaMath
                 {
                     double writedInterval = newIntervalMax.Replace(" ", string.Empty) == "+\\infty" ? double.MaxValue : Extension.Extension.StrToDouble(newIntervalMax);
                     if (GlobalVariable.IntervalleMin <= writedInterval)
+                    {                       
                         GlobalVariable.IntervalleMax = writedInterval;
+                        MainWindow._MainWindow.button_RefreshBoard_Click(this, null);
+                    }
                     else throw new Exception("_L'intervalle maximum ne peut pas être inférieur à l'intervalle minimum."); // intervalle max plus petit que intervalle min
-                    GlobalVariable.UpdateColumn();
                 };
 
                 Grid_RowContainer.Children.Add(UC_borneMin);
@@ -147,9 +152,7 @@ namespace SignaMath
                     {
                         uc.TextBox_Expression.textBox_clear.Text = uc.TextBox_Expression.textBox_clear.Text.Replace(oldLetter, Convert.ToChar(newFormula));
                     });
-
-                    // Change dans les paramètres globaux le nom de la variable par le nouveau
-
+                   
                     break;
 
                 // Si c'est une ligne contenant une expression mathématique qui contribue
@@ -159,6 +162,78 @@ namespace SignaMath
                     // Remplace les valeurs remarquables :
                     // Exponentielle :
                     newFormula = Extension.Extension.ReplaceValeurRemarquable(newFormula);
+
+                    // Si l'expression contient du sqrt() avec du x à l'intérieur, on calcul et trouve l'intervalle
+                    // de définition de la fonction et l'impose
+                    if (TextBox_Expression.textBox_clear.Text.Contains("sqrt("))
+                    {
+                        // récupère toutes les racines carrés (ex : sqrt(5x+4) -> 5x+4)
+                        string pattern = @"sqrt\((.*?)\)";
+                        MatchCollection matches = Regex.Matches(TextBox_Expression.textBox_clear.Text, pattern);
+
+                        if (matches.Count > 0)
+                        {
+                            List<string> _solutions = new();
+
+                            foreach (Match match in matches)
+                            {
+                                string value = match.Groups[1].Value;
+
+                                // regarde s'il y a du x dans la racine
+                                // Sinon la racine est constante
+                                if (value.Contains(GlobalVariable.VariableName))
+                                {
+                                    // dans ce cas calcul l'équation de 'value = 0' pour savoir quand
+                                    // commence la fonction, car racine carré ne prend pas de nombre négatif
+                                    _solutions.AddRange(GetAllEquationSolution(value + " = 0"));
+                                }
+                                else
+                                {
+                                    // Vérifie que le nombre dans la racine est positif
+                                    Entity expression = value.ToEntity();
+                                    Entity result = expression.EvalNumerical();
+
+                                    if (Extension.Extension.StrToDouble(result.EvalNumerical().Stringize()) < 0)
+                                        throw new Exception("_Une racine carrée ne peut pas avoir un contenu négatif.");
+                                }
+                            }
+
+                            // prend la solution la plus grande
+                            if (_solutions.Any())
+                            {
+                                var max_solution = _solutions.Max(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()));
+                                var solution = _solutions.First(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()) == max_solution);
+
+                                double approximation = Extension.Extension.StrToDouble(solution.EvalNumerical().Stringize());
+
+                                // change l'intervalle min
+                                if (GlobalVariable.IntervalleMin < approximation && !IsLooping)
+                                {
+                                    IsLooping = true;
+                                    var headerRow = (MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
+                                        .First(x => x.RowType == RowType.HEADER));
+
+                                    // si approximation >= 0, alors intervalleMin
+                                    // sinon intervalleMax
+                                    // car par ex l'intervalle de def de -25x-4 = 0 est -inf ; -(4/25)
+                                    if (approximation >= 0)
+                                    {
+                                        headerRow.UC_borneMin.textBox_clear.Text = approximation.ToString();
+                                        GlobalVariable.IntervalleMin = approximation;
+                                    }
+                                    else
+                                    {
+                                        headerRow.UC_borneMax.textBox_clear.Text = approximation.ToString();
+                                        GlobalVariable.IntervalleMax = approximation;
+                                    }
+
+                                    GlobalVariable.TableColumns.RemoveAll(x => x.Value <= GlobalVariable.IntervalleMin || x.Value >= GlobalVariable.IntervalleMax);
+                                    IsLooping = false;
+                                }
+                            }
+                        }
+                    }
+
 
                     // On va recalculer avec la nouvelle formule ses solutions, donc
                     // on enlève les colonnes du tableau des anciennes solutions trouvées.
@@ -387,64 +462,6 @@ namespace SignaMath
                 // Si c'est une row d'expression
                 if (RowType == RowType.MIDDLE || RowType == RowType.MIDDLE_INTERDITE)
                 {
-                    // Si l'expression contient du sqrt() avec du x à l'intérieur, on calcul et trouve l'intervalle
-                    // de définition de la fonction et l'impose
-                    if (TextBox_Expression.textBox_clear.Text.Contains("sqrt("))
-                    {
-                        // récupère toutes les racines carrés (ex : sqrt(5x+4) -> 5x+4)
-                        string pattern = @"sqrt\((.*?)\)";
-                        MatchCollection matches = Regex.Matches(TextBox_Expression.textBox_clear.Text, pattern);
-
-                        if (matches.Count > 0)
-                        {
-                            List<string> solutions = new();
-
-                            foreach (Match match in matches)
-                            {
-                                string value = match.Groups[1].Value;
-
-                                // regarde s'il y a du x dans la racine
-                                // Sinon la racine est constante
-                                if (value.Contains(GlobalVariable.VariableName))
-                                {
-                                    // dans ce cas calcul l'équation de 'value = 0' pour savoir quand
-                                    // commence la fonction, car racine carré ne prend pas de nombre négatif
-                                    solutions.AddRange(GetAllEquationSolution(value + " = 0"));
-                                }
-                                else
-                                {
-                                    // Vérifie que le nombre dans la racine est positif
-                                    Entity expression = value.ToEntity();
-                                    Entity result = expression.EvalNumerical();
-
-                                    if (Extension.Extension.StrToDouble(result.EvalNumerical().Stringize()) < 0)
-                                        throw new Exception("_Une racine carrée ne peut pas avoir un contenu négatif.");
-                                }
-                            }
-
-                            // prend la solution la plus grande
-                            if (solutions.Any())
-                            {
-                                var max_solution = solutions.Max(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()));
-                                var solution = solutions.First(x => Extension.Extension.StrToDouble(x.EvalNumerical().Stringize()) == max_solution);
-
-                                double approximation = Extension.Extension.StrToDouble(solution.EvalNumerical().Stringize());
-
-                                // change l'intervalle min
-                                if (GlobalVariable.IntervalleMin < approximation && !IsLooping)
-                                {
-                                    IsLooping = true;
-                                    var headerRow = (MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
-                                        .First(x => x.RowType == RowType.HEADER));
-                                    headerRow.UC_borneMin.formulaControl_formatted.Formula = approximation.ToString();
-                                    GlobalVariable.IntervalleMin = approximation;
-                                    tableColumns.RemoveAll(x => x.Value <= GlobalVariable.IntervalleMin || x.Value >= GlobalVariable.IntervalleMax);
-                                    IsLooping = false;
-                                }
-                            }
-                        }
-                    }
-
                     // Si l'expression n'a aucune solution c'est quelle est toujours pos ou toujours neg
                     if (!tableColumns.Any(x => x.FromRows.Contains(RowId)) && this.RowType != RowType.CONCLUANTE)
                     {

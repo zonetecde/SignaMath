@@ -19,6 +19,7 @@ namespace SignaMath
         internal Action<string,bool>? FormulaChanged = null; // Action appelée lorsque la formule est modifiée
         internal bool DirectWriting = false; // Indique si ce qui est saisi par l'utilisateur est déjà en format LaTex
         internal bool AllowEmpty = false; // Indique si une formule vide est autorisée
+        internal bool RefreshBoardAtEnd = false; // Après la fin de la validation de la formule, est-ce que le tableau doit être updaté?
 
         internal string DefaultFormula = string.Empty; // La formule donnée lors de la création
 

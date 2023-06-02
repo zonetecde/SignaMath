@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:SignaMath"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+    <Grid >
+       
         <Border x:Name="Border_TableauDeSigne" BorderThickness="2,2,2,0" BorderBrush="Black" 
                 VerticalAlignment="Center"
                 Grid.Row="1">
