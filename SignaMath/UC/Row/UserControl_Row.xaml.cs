@@ -254,11 +254,13 @@ namespace SignaMath
 
                     foreach (string solution in solutions)
                     {
+                        string _solution = solution.Trim();
+
                         // Calcul une approximation de la solution (dans le cas où elle contient un nombre aux décimals infinis)
-                        double approximation = Extension.Extension.StrToDouble(solution.EvalNumerical().Stringize());
+                        double approximation = Extension.Extension.StrToDouble(_solution.EvalNumerical().Stringize());
 
                         // On regarde si une colonne dans le tableau existe déjà contenant cette solution
-                        var column = GlobalVariable.TableColumns.FirstOrDefault(x => x.Expression == solution);
+                        var column = GlobalVariable.TableColumns.FirstOrDefault(x => x.Expression == _solution);
 
                         // Si la colonne existe déjà, on ajoute cette row à la liste de la colonne 
                         // contenant toutes les rows pour laquelle elle est une solution
@@ -269,7 +271,7 @@ namespace SignaMath
                         {
                             // Sinon, on ajoute une nouvelle colonne au tableau
                             // avec comme row concerné cette row-ci.
-                            ColumnElement columnElement = new ColumnElement(solution, approximation, new List<int> { RowId });
+                            ColumnElement columnElement = new ColumnElement(_solution, approximation, new List<int> { RowId });
                             GlobalVariable.TableColumns.Add(columnElement);
                         }
                     }
@@ -296,12 +298,15 @@ namespace SignaMath
             var tableColumns = new List<ColumnElement>(GlobalVariable.TableColumns);
             tableColumns.RemoveAll(x => x.Value <= GlobalVariable.IntervalleMin || x.Value >= GlobalVariable.IntervalleMax);
 
+            bool? lastArrowUp = null; // contient l'orientation de la flèche de la dernière colonne du tab de variation
+                                      // ainsi on peut savoir si on ajoute une nouvelle flèche ou étend la première
+
             // Ajoute, pour chaque colonne du tableau, une colonne dans la ligne
             // Le `i` va de 0 à `nombre de colonne + 1` car sinon il manquerait la dernière case dans la row
             for (int i = 0; i < tableColumns.Count + 1; i++)
             {
                 // Ajoute la colonne
-                Grid_RowColumns.ColumnDefinitions.Add(new ColumnDefinition());
+                Grid_RowColumns.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(1, GridUnitType.Star)});
 
                 // Si c'est la ligne header
                 if (RowType == RowType.HEADER)
@@ -388,6 +393,24 @@ namespace SignaMath
                     bool isPlus = (((UserControl_CellSign)MainWindow.TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>()
                         .First(x => x.RowType == RowType.CONCLUANTE).Grid_RowColumns.Children[i]))
                             .Label_Sign.Content.ToString() == "+";
+
+                    if (lastArrowUp == isPlus)
+                    {
+                        // étend la flèche de la dernière colonne; supprime donc celle qui vient d'être créé
+                        Grid_RowColumns.ColumnDefinitions.RemoveAt(Grid_RowColumns.ColumnDefinitions.Count - 1);
+                        Grid_RowColumns.ColumnDefinitions.Last().Width = new GridLength(Grid_RowColumns.ColumnDefinitions.Last().Width.Value + 1, GridUnitType.Star);
+                        break;
+                    }
+                    else
+                    {
+                        lastArrowUp = isPlus;
+
+                        // si c'est une valeur interdite alors on force le fait que la prochaine row ai sa propre flèche
+                        if (i != tableColumns.Count)
+                            if (tableColumns[i].ValeurInterdite)
+                                lastArrowUp = null;
+                    }
+                    
 
                     // Set l'image de la flèche
                     userControl_CellSign.Image_Arrow.Source = isPlus ? MainWindow._MainWindow.img_arrowTemplateTop.Source : MainWindow._MainWindow.img_arrowTemplateBottom.Source;
@@ -521,15 +544,11 @@ namespace SignaMath
                             {
                                 // Set la colonne entière en tant que valeur interdite (pour le tableau de variation)
                                 tableColumns[i].ValeurInterdite = true;
-
-                                // Affiche la seconde barre
-                                userControl_CellSign.Border_SecondeBarre.Visibility = Visibility.Visible;
                             }
-                            else
-                            {
-                                // Ce n'est pas une valeur interdite, on affiche le '0'
-                                userControl_CellSign.Label_Zero.Visibility = Visibility.Visible;
-                            }
+                            
+                            // on affiche le '0'
+                            userControl_CellSign.Label_Zero.Visibility = Visibility.Visible;
+                            
                         }
 
                         // Enfin, place le signe de l'expression entre la colonne d'avant et la colonne actuelle

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SignaMath.Extension
 {
@@ -16,44 +14,53 @@ namespace SignaMath.Extension
         /// <param name="function">La nouvelle fonction</param>
         internal static List<ExpressionElement> ShellFunction(string function)
         {
-            List<string> lignes = DecouperExpression(function);
+            List<ExpressionElement> lignes = DecouperExpression(function);
 
-            List<string> expressions = new();
+            List<ExpressionElement> expressions = new();
             if (lignes.Any())
             {
                 for (int i = 0; i < lignes.Count; i++)
                 {
-                    string expression = lignes[i];
-
-                    expression = SupprimerParentheses(expression);
-
-                    List<string> nouvellesExpressions = new List<string>();
-
-                    var decoupe = DecouperExpression(expression);
-                    nouvellesExpressions.AddRange(decoupe);
-
-                    nouvellesExpressions.ForEach(ligne =>
+                    if (String.IsNullOrEmpty(lignes[i].Exposant))
                     {
-                        expressions.Add((lignes[i].Contains('/') ? 'd' : 'n') + ligne.Replace("/", string.Empty).Replace("*", string.Empty));
-                    });
+                        string expression = lignes[i].Expression;
+
+                        expression = SupprimerParentheses(expression);
+
+                        List<ExpressionElement> nouvellesExpressions = new List<ExpressionElement>();
+
+                        var decoupe = DecouperExpression(expression);
+                        nouvellesExpressions.AddRange(decoupe);
+
+                        nouvellesExpressions.ForEach(ligne =>
+                        {
+                            expressions.Add(new ExpressionElement(lignes[i].Expression.Contains('/'), ligne.Expression.Replace("/", string.Empty).Replace("*", string.Empty)));
+                        });
+                    }
+                    else
+                    {
+                        // s'il y a un exposant on ne shell pas l'expression; on garde l'expression
+                        // total avec l'exposant
+                        expressions.Add(lignes[i]);
+                    }
                 }
             }
 
             for (int i = 0; i < expressions.Count; i++)
             {
-                string? expression = expressions[i].Remove(0, 1);
+                string? expression = expressions[i].Expression.Remove(0, 1);
                 var decoupe = DecouperExpression(expression, true);
                 if (decoupe.Count > 1)
                 {
                     expressions.RemoveAt(i);
-                    expressions.AddRange(decoupe.ConvertAll(x => expressions[i][0] + x));
+                    expressions.AddRange(decoupe.ConvertAll(x => new ExpressionElement(expressions[i].Interdite, x.Expression)));
                     i = 0;
                 }
             }
 
-            expressions.RemoveAll(x => x.Length == 1);
+            expressions.RemoveAll(x => x.Expression.Length == 1);
 
-            return (expressions.ConvertAll(x => new ExpressionElement(x.StartsWith('d'), x.Remove(0, 1))));
+            return expressions;
         }
 
         private static string SupprimerParentheses(string expression)
@@ -72,14 +79,14 @@ namespace SignaMath.Extension
             return expression;
         }
 
-        private static List<string> DecouperExpression(string nouvelleFonction, bool estDeuxieme = false)
+        private static List<ExpressionElement> DecouperExpression(string nouvelleFonction, bool estDeuxieme = false)
         {
             if (estDeuxieme)
             {
                 nouvelleFonction = SupprimerParentheses(nouvelleFonction);
             }
 
-            List<string> lignes = new List<string>();
+            List<ExpressionElement> lignes = new List<ExpressionElement>();
             int compteurParenthesesOuvertes = 0;
             int indexDebutLigne = 0;
 
@@ -95,15 +102,53 @@ namespace SignaMath.Extension
 
                     if (compteurParenthesesOuvertes == 0)
                     {
-                        string ligne = nouvelleFonction.Substring(indexDebutLigne, i - indexDebutLigne + 1);
-                        lignes.Add(ligne);
+                        string exposant = string.Empty;
+
+                        if (nouvelleFonction.Length > i + 1)
+                            if (nouvelleFonction[i + 1] == '^')
+                            {
+                                // il y a un exposant à l'expression, on la garde en entière
+                                // si l'exposant est 1 chiffre (ex : ^2)
+                                if (nouvelleFonction[i + 2] != '(')
+                                {
+                                    exposant += nouvelleFonction[i + 2];
+                                }
+                                else
+                                {
+                                    // exposant entre les parenthèses
+                                    bool endExp = false;
+                                    int z = i + 3; // index dans la parenthèse
+                                    int tempOuverte = 0;
+                                    while (!endExp)
+                                    {
+                                        exposant += nouvelleFonction[z];
+                                        if (nouvelleFonction[z + 1] == '(')
+                                            tempOuverte++;
+                                        else if (nouvelleFonction[z + 1] == ')' && tempOuverte > 0)
+                                            tempOuverte--;
+                                        else if (nouvelleFonction[z + 1] == ')')                                        
+                                            // fin de l'exposant
+                                            endExp = true;
+                                        
+                                        
+                                        z++;
+                                    }
+                                }
+                                
+                            }
+
+                        ExpressionElement exp = new ExpressionElement(true, nouvelleFonction.Substring(indexDebutLigne, i - indexDebutLigne + 1), exposant);
+
+                        lignes.Add(exp);
                         indexDebutLigne = i + 1;
                     }
                 }
                 else if (nouvelleFonction[i] == '/' && compteurParenthesesOuvertes == 0)
                 {
                     string ligneInterdite = nouvelleFonction.Substring(indexDebutLigne, i - indexDebutLigne).Trim();
-                    lignes.Add(ligneInterdite);
+                    ExpressionElement exp = new ExpressionElement(true, ligneInterdite, string.Empty);
+                    exp.Interdite = true;
+                    lignes.Add(exp);
                     indexDebutLigne = i;
                 }
             }
@@ -111,9 +156,11 @@ namespace SignaMath.Extension
             if (indexDebutLigne < nouvelleFonction.Length)
             {
                 string derniereLigne = nouvelleFonction.Substring(indexDebutLigne).Trim();
-                lignes.Add(derniereLigne);
+                ExpressionElement exp = new ExpressionElement(true, derniereLigne, string.Empty);
+                lignes.Add(exp);
             }
 
+            lignes.RemoveAll(x => x.Expression.StartsWith('^') || String.IsNullOrEmpty(x.Expression)); // enlève les exposants seul
             return lignes;
         }
     }

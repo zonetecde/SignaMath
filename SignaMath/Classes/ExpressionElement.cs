@@ -14,6 +14,16 @@ namespace SignaMath.Classes
             Expression = expression;
         }
 
+        public ExpressionElement(bool isNumerator, string expression, string exposant)
+        {
+            IsNumerator = isNumerator;
+            Exposant = exposant;
+            Expression = expression;
+        }
+
+        public bool IsNumerator { get; }
+        public string Exposant { get; }
+
         internal bool Interdite { get; set; }
         internal string Expression { get; set; }
     }

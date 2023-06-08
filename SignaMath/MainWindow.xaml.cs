@@ -35,7 +35,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.4";
+        private const string VERSION = "1.1.5";
         internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
         private Software Software { get; set; }
 
@@ -200,15 +200,23 @@ namespace SignaMath
             // Ajoute les nouvelles rows
             foreach(var row in rows)
             {
+                string expression = row.Expression;
+                if(!String.IsNullOrEmpty(row.Exposant))
+                {
+                    expression = expression.Insert(0, "(") + ")^("; // ajoute des parenthèses englobante
+                    expression += row.Exposant; // Ajoute l'exposant
+                    expression += ")";
+                }
+
                 if(row.Interdite)
                 {
                     Button_AddForbiddenValueRow_Click(this, null);
-                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = row.Expression;
+                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = expression;
                 }
                 else
                 {
                     Button_AddRow_Click(this, null);
-                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = row.Expression;
+                    TableauDeSigne.StackPanel_Row.Children.OfType<UserControl_Row>().Last().TextBox_Expression.textBox_clear.Text = expression;
                 }
             }
 
