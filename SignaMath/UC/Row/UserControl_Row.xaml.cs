@@ -398,8 +398,9 @@ namespace SignaMath
                     {
                         // étend la flèche de la dernière colonne; supprime donc celle qui vient d'être créé
                         Grid_RowColumns.ColumnDefinitions.RemoveAt(Grid_RowColumns.ColumnDefinitions.Count - 1);
+                        Grid_RowColumns.Children.RemoveAt(Grid_RowColumns.Children.Count - 1);
+                        userControl_CellSign = (UserControl_CellSign)Grid_RowColumns.Children[Grid_RowColumns.Children.Count - 1];
                         Grid_RowColumns.ColumnDefinitions.Last().Width = new GridLength(Grid_RowColumns.ColumnDefinitions.Last().Width.Value + 1, GridUnitType.Star);
-                        break;
                     }
                     else
                     {
@@ -410,7 +411,6 @@ namespace SignaMath
                             if (tableColumns[i].ValeurInterdite)
                                 lastArrowUp = null;
                     }
-                    
 
                     // Set l'image de la flèche
                     userControl_CellSign.Image_Arrow.Source = isPlus ? MainWindow._MainWindow.img_arrowTemplateTop.Source : MainWindow._MainWindow.img_arrowTemplateBottom.Source;
