@@ -14,6 +14,9 @@ namespace SignaMath.Extension
         /// <param name="function">La nouvelle fonction</param>
         internal static List<ExpressionElement> ShellFunction(string function)
         {
+            // On enlève les espaces inutiles et les signes en trop
+            function = function.Replace(" ", string.Empty).Replace(")*(", ")(");
+
             List<ExpressionElement> lignes = DecouperExpression(function);
 
             List<ExpressionElement> expressions = new();
@@ -100,7 +103,7 @@ namespace SignaMath.Extension
                 {
                     compteurParenthesesOuvertes--;
 
-                    if (compteurParenthesesOuvertes == 0)
+                    if (compteurParenthesesOuvertes == 0 || i == nouvelleFonction.Length-1)
                     {
                         string exposant = string.Empty;
 
@@ -138,6 +141,13 @@ namespace SignaMath.Extension
                             }
 
                         ExpressionElement exp = new ExpressionElement(true, nouvelleFonction.Substring(indexDebutLigne, i - indexDebutLigne + 1), exposant);
+                        
+                        // enlève l'exposant de la formule s'il y en a une
+                        if (!String.IsNullOrEmpty(exp.Exposant))
+                        {
+                            i -= ("^" + exp.Exposant).Length;
+                            nouvelleFonction = nouvelleFonction.Replace("^" + exp.Exposant, string.Empty);
+                        }
 
                         lignes.Add(exp);
                         indexDebutLigne = i + 1;
@@ -160,7 +170,8 @@ namespace SignaMath.Extension
                 lignes.Add(exp);
             }
 
-            lignes.RemoveAll(x => x.Expression.StartsWith('^') || String.IsNullOrEmpty(x.Expression)); // enlève les exposants seul
+            // enlève les exposants seul et les formules invalides
+            lignes.RemoveAll(x => x.Expression.StartsWith('^') || String.IsNullOrEmpty(x.Expression) || (x.Expression.Count(y => y == '(') != x.Expression.Count(y => y == ')'))); 
             return lignes;
         }
     }
