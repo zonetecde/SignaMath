@@ -1,6 +1,5 @@
 ﻿using AngouriMath;
 using AngouriMath.Extensions;
-using ClassLibrary;
 using HonkSharp.Fluency;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using Newtonsoft.Json;
@@ -24,6 +23,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
+using Zoneck.Data;
 using static AngouriMath.Entity;
 
 namespace SignaMath
@@ -35,8 +35,8 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.7";
-        internal static string BASE_URL { get; } = "https://zoneck.bsite.net";
+        private const string VERSION = "1.1.8";
+        internal static string BASE_URL { get; } = "http://168.119.108.139:5024";
         private Software Software { get; set; }
 
         internal static UserControl_TableauDeSigne TableauDeSigne { get; set; }

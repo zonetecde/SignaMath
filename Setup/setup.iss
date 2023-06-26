@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SignaMath"
-#define MyAppVersion "1.1.7"
+#define MyAppVersion "1.1.8"
 #define MyAppPublisher "zonetecde"
 #define MyAppURL "github.com/zonetecde/SignaMath"
 #define MyAppExeName "SignaMath.exe"
@@ -53,7 +53,7 @@ Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Pro
 Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\WpfMath.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\XamlMath.Shared.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\ClassLibrary.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Zoneck.Data.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
