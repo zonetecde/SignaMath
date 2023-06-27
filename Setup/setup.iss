@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SignaMath"
-#define MyAppVersion "1.1.8"
+#define MyAppVersion "1.1.9"
 #define MyAppPublisher "zonetecde"
 #define MyAppURL "github.com/zonetecde/SignaMath"
 #define MyAppExeName "SignaMath.exe"
@@ -37,25 +37,32 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; 
 
 [Files]
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\AngouriMath.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Antlr4.Runtime.Standard.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\GenericTensor.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\HonkSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\MathNet.Numerics.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Microsoft.WindowsAPICodePack.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Microsoft.WindowsAPICodePack.Shell.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Numbers.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.deps.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.pdb"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\WpfMath.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\XamlMath.Shared.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Zoneck.Data.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\AngouriMath.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Antlr4.Runtime.Standard.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\GenericTensor.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\HonkSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\MathNet.Numerics.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Microsoft.WindowsAPICodePack.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Microsoft.WindowsAPICodePack.Shell.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Numbers.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.deps.json"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.exe"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.pdb"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\SignaMath.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\WpfMath.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\XamlMath.Shared.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Zoneck.Data.dll"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\D3DCompiler_47_cor3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\PenImc_cor3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\PresentationNative_cor3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\SignaMath.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\vcruntime140_cor3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\Cloud\OneDrive - Conseil régional Grand Est - Numérique Educatif\Programmation\c#\SignaMath\SignaMath\bin\Release\net6.0-windows\publish\win-x86\wpfgfx_cor3.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

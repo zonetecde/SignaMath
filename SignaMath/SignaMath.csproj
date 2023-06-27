@@ -38,8 +38,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Zoneck.Data">
-      <HintPath>..\..\..\webapi\Zoneck_Api\Zoneck.Data\bin\Debug\net6.0\Zoneck.Data.dll</HintPath>
+    <Reference Include="Zoneck.Data.Public">
+      <HintPath>..\..\..\webapi\Zoneck_Api\Zoneck.Data\bin\Debug\net6.0\Zoneck.Data.Public.dll</HintPath>
     </Reference>
   </ItemGroup>
 

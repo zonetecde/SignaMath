@@ -23,7 +23,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
-using Zoneck.Data;
+using Zoneck.Data.Public;
 using static AngouriMath.Entity;
 
 namespace SignaMath
@@ -35,7 +35,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.8";
+        private const string VERSION = "1.1.9";
         internal static string BASE_URL { get; } = Config.Server;
         private Software Software { get; set; }
 
