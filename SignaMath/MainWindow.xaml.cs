@@ -36,7 +36,7 @@ namespace SignaMath
         internal static MainWindow _MainWindow { get; set; }
 
         private const string VERSION = "1.1.8";
-        internal static string BASE_URL { get; } = "http://168.119.108.139:5024";
+        internal static string BASE_URL { get; } = Config.Server;
         private Software Software { get; set; }
 
         internal static UserControl_TableauDeSigne TableauDeSigne { get; set; }
