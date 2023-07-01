@@ -35,7 +35,7 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.1.9";
+        private const string VERSION = "1.2.0";
         internal static string BASE_URL { get; } = Config.Server;
         private Software Software { get; set; }
 
@@ -484,7 +484,7 @@ namespace SignaMath
                         });
                     });
 
-                    string filePath = @"V_SignaMath.exe";
+                    string filePath = $"SignaMath {Software.Version}.exe";
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
@@ -556,17 +556,35 @@ namespace SignaMath
                             richTextBox_news.Document.Blocks.Clear();
                             richTextBox_news.AppendText(Software.Features.Replace("\\n", "\n"));
                         }
+                        else
+                        {
+                            // Supprime l'exe des anciennes version
+                            foreach (var file in Directory.GetFiles(Environment.CurrentDirectory))
+                            {
+                                if (file.Contains("SignaMath") && file.Contains("exe") && !file.Contains($"SignaMath {Software.Version}.exe"))
+                                {
+                                    try
+                                    {
+                                        File.Delete(file);
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
                     }
                     else
                     {
-                        // serveur problème
+                        // Problème serveur
                     }
 
                 }
             }
             catch
             {
-                // Pas de connexion internet / Problème serveur
+                // Pas de connexion internet 
             }
         }
 
