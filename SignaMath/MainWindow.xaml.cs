@@ -35,8 +35,8 @@ namespace SignaMath
     {
         internal static MainWindow _MainWindow { get; set; }
 
-        private const string VERSION = "1.2.0";
-        internal static string BASE_URL { get; } = Config.Server;
+        private const string VERSION = "1.2.1";
+        internal static string BASE_URL { get; } = Zoneck.Util.Server.Api.GetApi();
         private Software Software { get; set; }
 
         internal static UserControl_TableauDeSigne TableauDeSigne { get; set; }

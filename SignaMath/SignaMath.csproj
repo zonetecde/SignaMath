@@ -39,7 +39,10 @@
 
   <ItemGroup>
     <Reference Include="Zoneck.Data.Public">
-      <HintPath>..\..\..\webapi\Zoneck_Api\Zoneck.Data\bin\Debug\net6.0\Zoneck.Data.Public.dll</HintPath>
+      <HintPath>..\..\..\c# - Web Api\Zoneck_Api\Zoneck.Data.Public\bin\Debug\net6.0\Zoneck.Data.Public.dll</HintPath>
+    </Reference>
+    <Reference Include="Zoneck.Util.Server">
+      <HintPath>..\..\..\c# - Web Api\Zoneck_Api\Zoneck.Util.Server\bin\Debug\net6.0\Zoneck.Util.Server.dll</HintPath>
     </Reference>
   </ItemGroup>
 
