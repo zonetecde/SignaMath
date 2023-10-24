@@ -1,5 +1,12 @@
 # SignaMath
 
+## ![France](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/16/country-4x3/fr.png "France") CE LOGICIEL EST DÉPRÉCIÉE.
+Merci de vous rendre sur le nouveau site [SignaMath](www.signamath.online).
+
+## ![United States](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/16/country-4x3/us.png "United States") THIS SOFTWARE IS DEPRECATED.
+Please visit the new [SignaMath](www.signamath.online) website instead.
+
+</br></br>
 ### Table of Contents
 - [English](#english-part)
 - [Français](#partie-française)
